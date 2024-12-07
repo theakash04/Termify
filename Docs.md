@@ -16,8 +16,6 @@ To start using the environment:
 ```bash
 conda activate myenv
 ```
-
-
 ---
 
 ## 2. Manage Packages
@@ -65,20 +63,16 @@ SNOWFLAKE_WAREHOUSE=warehousename
 
 2. **Sync your branch with master branch**
 ```bash
-# 1. Go to master branch
-git checkout master
+# 1. In your own branch which is dev/yourname
+git fetch
 
-# 2. Pull from remote master branch to locally
-git pull master
+# 2. resolve merge conflicts if any
 
-# 3. change branch to your branch 
-git checkout dev/yourname
+# 3. merge it in your code locally
+git merge origin/master
 
-# 4. pull from origin master
-git pull origin master
-
-# Now you can start writing your code or sync your branch remotelly to sync you can do 
-git push
+# 4. Now push your code remotelly
+git push origin dev/akash
 ```
 
 
