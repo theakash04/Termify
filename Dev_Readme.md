@@ -53,6 +53,15 @@ To remove a package:
 1. **Environment Variables**
 
 Create a `.env` file in the root directory and add your variables.
+```env
+SNOWFLAKE_ACCOUNT=acountname.region
+SNOWFLAKE_USER=username
+SNOWFLAKE_PASSWORD=********
+SNOWFLAKE_DATABASE=databasename
+SNOWFLAKE_SCHEMA=schemaname
+SNOWFLAKE_ROLE=role
+SNOWFLAKE_WAREHOUSE=warehousename
+```
 
 2. **Sync your branch with master branch**
 ```bash
