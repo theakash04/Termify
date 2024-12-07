@@ -96,7 +96,29 @@ git push -u origin dev/yourname
 
 4. Now go to `github.com` and make a pull request or contribute when making pull request make sure write comment on what you changed point vise
 
+### Steps on how You can create a session with snowfake **Make sure you have created `.env` file in root directory**
+```python
+# Import the class
+from your_module import SnowflakeConnector
 
-`Do clean code`
+# Step 1: Instantiate the class
+connector = SnowflakeConnector()
 
+# Step 2: Connect to Snowflake
+connector.connect()
+
+# Step 3: Retrieve the session
+session = connector.get_session()
+
+if session:  # Check if the session is active
+    try:
+        # Step 4: Execute a query
+        result = session.sql("SELECT CURRENT_VERSION()").collect()
+        print(f"Snowflake Version: {result[0][0]}")
+    except Exception as e:
+        print(f"Error occurred while executing query: {e}")
+
+# Step 5: Close the connection
+connector.close_connection()
+```
 
