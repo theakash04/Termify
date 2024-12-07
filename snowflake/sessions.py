@@ -32,20 +32,20 @@ class SnowflakeConnector:
         }
         self.session = None
         
-    def connect(self):
+    def __connect(self):
         try:
             self.session = Session.builder.configs(self.connection_parameters).create()
             print("Connected successfully")
         except Exception as e:
-            print(f"Error occured during connection: {e}")
+            print(f"Error occurred during connection: {e}")
             self.session = None
             
     def get_session(self):
         if not self.session:
-            print("No active sessions. Please connect first")
-            return None
-        
+            self.__connect() # Establish a new session if none exists
         return self.session
+     
+        
     
     def close_connection(self):
         if self.session:
@@ -54,7 +54,7 @@ class SnowflakeConnector:
                 print("Session closed successfully")
                 
             except Exception as e:
-                print(f"Error occured while closing the session: {e}")
+                print(f"Error occurred while closing the session: {e}")
         else:
             print("No active sessions to close")
 
