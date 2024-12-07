@@ -13,7 +13,7 @@ if [ "$#" -eq 0 ]; then
     echo "No arguments provided. Installing all dependencies from requirements.txt..."
     pip install -r requirements.txt
     # Update requirements.txt after installation
-    pip freeze > requirements.txt
+   # pip freeze > requirements.txt
     echo "requirements.txt updated."
     exit 0
 fi
