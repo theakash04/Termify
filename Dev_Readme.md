@@ -54,17 +54,40 @@ To remove a package:
 
 Create a `.env` file in the root directory and add your variables.
 
-2. **Merge Your Branch with the Main Branch**:
-   - After finishing your task, merge your branch with `main`:
-     ```bash
-     git fetch origin
-     git merge origin/main
-     ```
+2. **Sync your branch with master branch**
+```bash
+# 1. Go to master branch
+git checkout master
 
-3. **Push and Pull After PR Acceptance**:
-   - Once your PR is accepted, pull the latest changes from `main`:
-     ```bash
-     git pull origin main
-     ```
+# 2. Pull from remote master branch to locally
+git pull master
+
+# 3. change branch to your branch 
+git checkout dev/yourname
+
+# 4. pull from origin master
+git pull origin master
+
+# Now you can start writing your code or sync your branch remotelly to sync you can do 
+git push
+```
+
+
+3. How to push your code to main branch **Make sure you are in your own branch not someone else or Master branch**
+```bash
+# first stage your changes
+git add .
+
+# commit your changes
+git commit -m "update: something update"
+
+# push your changes to your branch
+git push -u origin dev/yourname
+```
+
+4. Now go to `github.com` and make a pull request or contribute when making pull request make sure write comment on what you changed point vise
+
+
+`Do clean code`
 
 
