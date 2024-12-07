@@ -16,6 +16,11 @@ To start using the environment:
 ```bash
 conda activate myenv
 ```
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> e163647 (update: change name of readme to Docs)
 ---
 
 ## 2. Manage Packages
@@ -63,6 +68,7 @@ SNOWFLAKE_WAREHOUSE=warehousename
 
 2. **Sync your branch with master branch**
 ```bash
+<<<<<<< HEAD
 # 1. In your own branch which is dev/yourname
 git fetch
 
@@ -73,6 +79,22 @@ git merge origin/master
 
 # 4. Now push your code remotelly
 git push origin dev/akash
+=======
+# 1. Go to master branch
+git checkout master
+
+# 2. Pull from remote master branch to locally
+git pull master
+
+# 3. change branch to your branch 
+git checkout dev/yourname
+
+# 4. pull from origin master
+git pull origin master
+
+# Now you can start writing your code or sync your branch remotelly to sync you can do 
+git push
+>>>>>>> e163647 (update: change name of readme to Docs)
 ```
 
 
