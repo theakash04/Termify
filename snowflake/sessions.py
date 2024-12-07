@@ -1,11 +1,8 @@
 import os
-from dotenv import load_dotenv
 from snowflake.snowpark import Session
 
 class SnowflakeConnector:
     def __init__(self):
-        
-        load_dotenv()
         required_env_vars = [
             "SNOWFLAKE_ACCOUNT",
             "SNOWFLAKE_USER",
@@ -15,12 +12,12 @@ class SnowflakeConnector:
             "SNOWFLAKE_WAREHOUSE",
             "SNOWFLAKE_SCHEMA",
         ]
-        
+
         for var in required_env_vars:
             if var not in os.environ:
                 raise ValueError(f"Missing required environment variable: {var}")
-                
-        
+
+
         self.connection_parameters = {
             "account": os.environ["SNOWFLAKE_ACCOUNT"],
             "user": os.environ["SNOWFLAKE_USER"],
@@ -58,3 +55,5 @@ class SnowflakeConnector:
         else:
             print("No active sessions to close")
 
+
+__all__ = ["SnowflakeConnector"]
