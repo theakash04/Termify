@@ -64,12 +64,12 @@ SNOWFLAKE_WAREHOUSE=warehousename
 2. **Sync your branch with master branch**
 ```bash
 # 1. In your own branch which is dev/yourname
-git fetch
+git fetch origin
 
 # 2. resolve merge conflicts if any
 
 # 3. merge it in your code locally
-git merge origin/master
+git rebase origin/master
 
 # 4. Now push your code remotelly
 git push origin dev/akash
