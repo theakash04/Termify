@@ -50,9 +50,20 @@ To remove a package:
 
 ## Developer Notes (Temporary)
 
-1. **Environment Variables**
+1. **Configuration file**
 
-Create a `.env` file in the root directory and add your variables.
+Create a configuration file name `connections.toml` in `.snowflake` dir and the following variable and their data
+```toml
+[myconnection]
+account = "test-account"
+user = "test_user"
+password = "******"
+role = "test_role"
+warehouse = "test_warehouse"
+database = "test_database"
+schema = "test_schema"
+```
+
 
 2. **Merge Your Branch with the Main Branch**:
    - After finishing your task, merge your branch with `main`:
