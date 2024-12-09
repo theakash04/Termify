@@ -2,4 +2,10 @@ name: app_environment
 channels:
   - snowflake
 dependencies:
+  - snowflake=*
+  - snowflake-ml-python=*
+  - snowflake-snowpark-python=*
   - snowflake.core=*
+  - trulens-connectors-snowflake=*
+  
+  
