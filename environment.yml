@@ -6,6 +6,10 @@ dependencies:
   - snowflake=*
   - snowflake-ml-python=*
   - snowflake-snowpark-python=*
+  - snowflake=*
+  - snowflake-ml-python=*
+  - snowflake-snowpark-python=*
   - snowflake.core=*
   - trulens-connectors-snowflake=*
-
+  
+  
