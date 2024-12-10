@@ -11,5 +11,13 @@ dependencies:
   - snowflake-snowpark-python=*
   - snowflake.core=*
   - trulens-connectors-snowflake=*
+  - langchain-core
+  - langchain-text-splitters
+  - pypdf
+  - pip
+  - pip:
+      - langchain_community
+      - snowflake-snowpark-python[modin]
+
   
   

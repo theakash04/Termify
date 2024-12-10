@@ -2,51 +2,36 @@
 
 This guide helps you manage your Python environment and dependencies in the project.
 
-## 1. Set Up the Conda Environment
+## 1. Set Up the Python Environment
 
 ### a. Create a Conda Environment with Python 3.10
 To create a new environment with Python 3.10:
 ```bash
-conda create -n myenv python=3.10
+python3.10 -m venv <envName>
 ```
 This creates an environment named `myenv`.
 
-### b. Activate the Conda Environment
+### b. Activate your created Environment
 To start using the environment:
 ```bash
-conda activate myenv
+source .venv/bin/activate
 ```
 ---
 
 ## 2. Manage Packages
 
-### Prerequisites
-Make sure the `manage_package.sh` script is executable. If it's not, run:
+### Install all dependencies after activating your enviroment
 ```bash
-chmod +x manage_package.sh
+pip install -r requirement.txt
 ```
 
-### a. Install All Dependencies from `requirements.txt`
-To install all packages listed in `requirements.txt`, just run:
+### Before pushing to git make sure to run the below command to sync your env packages to requirents for other devs
 ```bash
-./manage_package.sh
+pip freeze > requirement.txt
 ```
-
-### b. Install a Specific Package
-To install a new package:
-```bash
-./manage_package.sh -i <package-name>
-```
-
-### c. Delete a Package
-To remove a package:
-```bash
-./manage_package.sh -d <package-name>
-```
-
 ---
 
-## Developer Notes (Temporary)
+## Developer Notes
 
 1. **Environment Variables**
 
@@ -72,7 +57,7 @@ git fetch origin
 git rebase origin/master
 
 # 4. Now push your code remotelly
-git push origin dev/akash
+git push origin dev/yourname
 ```
 
 
@@ -103,14 +88,6 @@ connector.connect()
 
 # Step 3: Retrieve the session
 session = connector.get_session()
-
-if session:  # Check if the session is active
-    try:
-        # Step 4: Execute a query
-        result = session.sql("SELECT CURRENT_VERSION()").collect()
-        print(f"Snowflake Version: {result[0][0]}")
-    except Exception as e:
-        print(f"Error occurred while executing query: {e}")
 
 # Step 5: Close the connection
 connector.close_connection()
