@@ -8,3 +8,7 @@ session = sfConnect.get_session()
 root = Root(session)
 
 
+
+session = sfConnect.get_session()
+root = Root(session)
+
