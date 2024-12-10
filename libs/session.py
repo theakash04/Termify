@@ -1,3 +1,4 @@
+# create a session with snowflake
 import os
 from dotenv import load_dotenv
 from snowflake.snowpark import Session
