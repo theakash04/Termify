@@ -16,7 +16,8 @@ dependencies:
   - pypdf
   - pip
   - pip:
-      -langchain_community
-  
+      - langchain_community
+      - snowflake-snowpark-python[modin]
+
   
   
