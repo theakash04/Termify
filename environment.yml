@@ -17,7 +17,7 @@ dependencies:
   - pip
   - pip:
       - langchain_community
-      - snowflake-snowpark-python[modin]
+      
 
   
   
