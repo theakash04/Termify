@@ -3,6 +3,8 @@ from snowflake.core import Root
 import os
 from dotenv import load_dotenv
 
+load_dotenv()
+
 
 class SnowflakeConnector:
     def __init__(self):
@@ -11,7 +13,8 @@ class SnowflakeConnector:
         required_env_vars = [
             "SNOWFLAKE_ACCOUNT",
             "SNOWFLAKE_USER",
-            "SNOWFLAKE_PASSWORD"
+            "SNOWFLAKE_PASSWORD",
+            "SNOWFLAKE_ROLE"
             ]
 
         
@@ -22,7 +25,10 @@ class SnowflakeConnector:
         self.connection_parameters = {
             "account": os.environ["SNOWFLAKE_ACCOUNT"],
             "user" : os.environ["SNOWFLAKE_USER"],
-            "password" : os.environ["SNOWFLAKE_PASSWORD"] 
+            "password" : os.environ["SNOWFLAKE_PASSWORD"] ,
+            "role" : os.environ["SNOWFLAKE_ROLE"],
+            "warehouse": os.environ["SNOWFLAKE_WAREHOUSE"],
+            "schema" : os.environ["SNOWFLAKE_SCHEMA"]
         }
         self.session = None
 
