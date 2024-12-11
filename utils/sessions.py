@@ -1,5 +1,4 @@
 from snowflake.snowpark import Session
-from snowflake.core import Root 
 import os
 from dotenv import load_dotenv
 

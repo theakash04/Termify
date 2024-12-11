@@ -14,14 +14,13 @@ class DocumentParser:
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
 
-     
     # Method to loading the pdf files
     def __pdfLoader(self, path): 
 
-        try: 
+        try:
             loader = PyPDFLoader(path)
             pages = []
-        
+
             for page in loader.alazy_load():
                 pages.append(page.page_content)
 
@@ -34,7 +33,7 @@ class DocumentParser:
 
         except Exception as e:
             raise RuntimeError(f"An error occurred while loading the document: {e}") 
-                
+
 
     # Method to divde the pdf into chunks
     def chunkCreator(self, path, chunk_size, chunk_overlap):
@@ -46,7 +45,7 @@ class DocumentParser:
             chunk_overlap = chunk_overlap,
             length_function = len
         )
-        
+
         chunks = text_splitter.split_text(doc_text)
         chunks_data_frame = pd.DataFrame(chunks, column=['chunks'], index=False, name=None)
 
