@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 
 class SnowflakeConnector:
     def __init__(self):
+        
+        # set the variables in an .env file 
         required_env_vars = [
             "SNOWFLAKE_ACCOUNT",
             "SNOWFLAKE_USER",
@@ -24,7 +26,7 @@ class SnowflakeConnector:
         }
         self.session = None
 
-        def __connect(self):
+    def __connect(self):
             try:
                 self.session = Session.builder.configs(self.connection_parameters).create()
                 print("Connected Successfully")
@@ -32,12 +34,12 @@ class SnowflakeConnector:
                 print(f"Error occured during connection: {e}")
                 self.session = None
 
-        def get_session(self):
+    def get_session(self):
             if not self.session:
                 self.__connect()
             return self.session 
         
-        def close_connection(self):
+    def close_connection(self):
             if self.session:
                 try:
                     self.session.close()
