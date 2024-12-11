@@ -1,13 +1,8 @@
 import streamlit as st
-from libs.session import snowflakeConnector
+from utils.sessions import SnowflakeConnector
 from snowflake.core import Root
 
-sfConnect = snowflakeConnector()
-
-session = sfConnect.get_session()
-root = Root(session)
-
-
+sfConnect = SnowflakeConnector()
 
 session = sfConnect.get_session()
 root = Root(session)
