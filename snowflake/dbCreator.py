@@ -1,6 +1,6 @@
 from snowflake.snowpark import Session
 from sessions import SnowflakeConnector
-from document_parser import DocumentParser
+from docParser import DocumentParser
 import pandas as pd
 
 """
@@ -25,11 +25,6 @@ Usage:
    cortex_search = CortexSearchModule(connector, pdf_path)
 """
 
-
-from snowflake.snowpark import Session
-from snowflake_connector import SnowflakeConnector
-from document_parser import DocumentParser
-import pandas as pd
 
 class CortexSearchModule:
     def __init__(self, connector: SnowflakeConnector, pdf_path: str):
