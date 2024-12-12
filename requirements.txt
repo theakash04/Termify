@@ -5,6 +5,7 @@ aiohttp==3.11.10
 aioitertools==0.12.0
 aiosignal==1.3.1
 alembic==1.14.0
+altair==5.5.0
 annotated-types==0.7.0
 anyio==3.7.1
 asn1crypto==1.5.1
@@ -12,11 +13,13 @@ asttokens==3.0.0
 async-timeout==4.0.3
 atpublic==5.0
 attrs==24.2.0
+blinker==1.9.0
 botocore==1.35.36
 cachetools==5.5.0
 certifi==2024.8.30
 cffi==1.17.1
 charset-normalizer==3.4.0
+click==8.1.7
 cloudpickle==2.2.1
 comm==0.2.2
 cryptography==44.0.0
@@ -30,6 +33,8 @@ executing==2.1.0
 filelock==3.16.1
 frozenlist==1.5.0
 fsspec==2023.12.2
+gitdb==4.0.11
+GitPython==3.1.43
 greenlet==3.1.1
 h11==0.14.0
 httpcore==1.0.7
@@ -41,10 +46,13 @@ importlib_resources==6.4.5
 ipykernel==6.29.5
 ipython==8.30.0
 jedi==0.19.2
+Jinja2==3.1.4
 jmespath==1.0.1
 joblib==1.4.2
 jsonpatch==1.33
 jsonpointer==3.0.0
+jsonschema==4.23.0
+jsonschema-specifications==2024.10.1
 jupyter_client==8.6.3
 jupyter_core==5.7.2
 langchain==0.3.11
@@ -61,6 +69,7 @@ mdurl==0.1.2
 multidict==6.1.0
 munch==2.5.0
 mypy-extensions==1.0.0
+narwhals==1.17.0
 nest-asyncio==1.6.0
 numpy==1.26.4
 nvidia-nccl-cu12==2.23.4
@@ -72,6 +81,7 @@ packaging==24.2
 pandas==2.2.3
 parso==0.8.4
 pexpect==4.9.0
+pillow==11.0.0
 platformdirs==4.3.6
 prompt_toolkit==3.0.48
 propcache==0.2.1
@@ -84,6 +94,7 @@ pycparser==2.22
 pydantic==2.10.3
 pydantic-settings==2.6.1
 pydantic_core==2.27.1
+pydeck==0.9.1
 Pygments==2.18.0
 PyJWT==2.10.1
 pyOpenSSL==24.3.0
@@ -94,14 +105,17 @@ pytimeparse==1.1.8
 pytz==2024.2
 PyYAML==6.0.2
 pyzmq==26.2.0
+referencing==0.35.1
 requests==2.32.3
 requests-toolbelt==1.0.0
 retrying==1.3.4
 rich==13.9.4
+rpds-py==0.22.3
 s3fs==2023.12.2
 scikit-learn==1.5.2
 scipy==1.14.1
 six==1.17.0
+smmap==5.0.1
 sniffio==1.3.1
 snowflake==1.0.2
 snowflake-connector-python==3.12.4
@@ -114,8 +128,10 @@ sortedcontainers==2.4.0
 SQLAlchemy==2.0.36
 sqlparse==0.5.3
 stack-data==0.6.3
+streamlit==1.40.2
 tenacity==9.0.0
 threadpoolctl==3.5.0
+toml==0.10.2
 tomlkit==0.13.2
 tornado==6.4.2
 traitlets==5.14.3
@@ -127,6 +143,7 @@ typing_extensions==4.12.2
 tzdata==2024.2
 tzlocal==5.2
 urllib3==2.2.3
+watchdog==6.0.0
 wcwidth==0.2.13
 wrapt==1.17.0
 xgboost==2.1.3

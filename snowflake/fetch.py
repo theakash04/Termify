@@ -16,7 +16,6 @@ my_service = (root
   .databases["CORTEX_CONNECT"]
   .schemas["CORTEX_SEARCH_S"]
   .cortex_search_services["mysearch"]
-
 )
 
 # query service
