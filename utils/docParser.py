@@ -25,11 +25,13 @@ Usage:
 
 """
 
+
 class DocumentParser:
     def __init__(
-            self, path="/home/pranav/snowflake/Lorem_ipsum.pdf",
-            chunk_size=1500,
-            chunk_overlap=256
+        self,
+        path="/home/pranav/snowflake/Lorem_ipsum.pdf",
+        chunk_size=1500,
+        chunk_overlap=256,
     ):
 
         self.path = path
@@ -37,15 +39,15 @@ class DocumentParser:
         self.chunk_overlap = chunk_overlap
 
     # Method to load the PDF files
-    def __pdfLoader(self, path): 
+    async def __pdfLoader(self, path):
         try:
             loader = PyPDFLoader(path)
             pages = []
 
-            for page in loader.alazy_load():
+            async for page in loader.alazy_load():
                 pages.append(page.page_content)
 
-            pages_text = ", ".join(pages) 
+            pages_text = ", ".join(pages)
 
             return pages_text
 
@@ -53,21 +55,22 @@ class DocumentParser:
             raise FileNotFoundError(f"File not found at path: {path}")
 
         except Exception as e:
-            raise RuntimeError(f"An error occurred while loading the document: {e}") 
+            raise RuntimeError(f"An error occurred while loading the document: {e}")
 
     # Method to divide the PDF into chunks
-    def chunkCreator(self):
-        doc_text = self.__pdfLoader(self.path)
+    async def chunkCreator(self):
+        doc_text = await self.__pdfLoader(self.path)
 
         text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=self.chunk_size,             
-            chunk_overlap=self.chunk_overlap,       
-            length_function=len
+            chunk_size=self.chunk_size,
+            chunk_overlap=self.chunk_overlap,
+            length_function=len,
         )
 
         chunks = text_splitter.split_text(doc_text)
-        chunks_data_frame = pd.DataFrame(chunks, columns=['CHUNKS'])  
+        chunks_data_frame = pd.DataFrame(chunks, columns=["CHUNKS"])
 
         return chunks_data_frame
+
 
 __all__ = ["DocumentParser"]
