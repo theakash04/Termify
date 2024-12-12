@@ -1,5 +1,5 @@
 from snowflake.snowpark import Session
-from snowflake_connector import SnowflakeConnector
+from sessions import SnowflakeConnector
 from document_parser import DocumentParser
 import pandas as pd
 
