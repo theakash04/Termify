@@ -1,76 +1,75 @@
 from snowflake.snowpark import Session
-from snowflake.core import Root, CreateMode
-from snowflake.core.database import Database
-from snowflake.core.schema import Schema
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.document_loaders import PyPDFLoader
+from sessions import SnowflakeConnector
+from docParser import DocumentParser
 import pandas as pd
+
+"""
+CortexSearchModule
+
+This module provides functionality for loading PDF content, chunking the text into smaller parts, and storing the results in a Snowflake database. It includes methods to:
+
+1. Load content from a PDF file.
+2. Create a Snowflake database and schema if they do not already exist.
+3. Split the loaded text into smaller chunks and generate prompts for further processing.
+
+The main class `CortexSearchModule` encapsulates all the operations needed for processing and storing the PDF content.
+
+Usage:
+1. **Initialize**: 
+   - Create an instance of `SnowflakeConnector` and provide the necessary Snowflake connection details (like account, user, password, role) via environment variables.
+   - Provide the path to the PDF file to be processed.
+
+   ```python
+   connector = SnowflakeConnector()  # Initialize SnowflakeConnector
+   pdf_path = "/path/to/your/document.pdf"  # Path to the PDF file
+   cortex_search = CortexSearchModule(connector, pdf_path)
+"""
 
 
 class CortexSearchModule:
-    def __init__(self, session: Session, pdf_path: str):
-        self.session = session
+    def __init__(self, connector: SnowflakeConnector, pdf_path: str):
+        self.connector = connector
         self.pdf_path = pdf_path
-        self.pages_text = None
-
-    def load_pdf_content(self):
-        loader = PyPDFLoader(self.pdf_path)
-        pages = []
-        async for page in loader.alazy_load():
-            pages.append(page.page_content)
-        self.pages_text = "\n".join(pages)
+        self.session = self.connector.get_session()
 
     def create_database_and_schema(self):
-        root = Root(self.session)
-        database = root.databases.create(
-            Database(
-                name="CORTEX_CONNECT_DB"
-            ),
-            mode=CreateMode.or_replace
+        root = self.session.create_root()
+        database = root.database.create(
+            name="CORTEX_CONNECT_DB",
+            mode="or_replace"
         )
-        print("Created database.")
-
-        schema = database.schemas.create(
-            Schema(
-                name="CORTEX_SEARCH_SCHEMA"
-            ),
-            mode=CreateMode.or_replace
+        print("Created database")
+        
+        schema = database.schema.create(
+            name="CORTEX_SEARCH_SCHEMA",
+            mode="or_replace"
         )
-        print("Created schema.")
+        print("Created schema")
+       
 
     def chunk_text(self):
-        class TextChunker:
-            def process(self, pdf_text: str):
-                text_splitter = RecursiveCharacterTextSplitter(
-                    chunk_size=1512,
-                    chunk_overlap=256,
-                    length_function=len
-                )
-                chunks = text_splitter.split_text(pdf_text)
-                prompts = [
-                    f"Given the document content: <chunk content: {chunk}>, identify the relevant category."
-                    for chunk in chunks
-                ]
-                df = pd.DataFrame({
-                    'chunks': chunks,
-                    'prompts': prompts
-                })
-                return df
+        document_parser = DocumentParser(
+            path=self.pdf_path,
+            chunk_size=1500,
+            chunk_overlap=256
+        )
+        chunks_df = document_parser.chunkCreator()
 
-        chunker = TextChunker()
-        result = chunker.process(self.pages_text)
-        return result
+        # Generate prompts for each chunk
+        chunks_df["prompts"] = chunks_df["CHUNKS"].apply(
+            lambda chunk: f"Given the document content: <chunk content: {chunk}>, identify the relevant category."
+        )
 
-    def store_results_in_snowflake(self, result_df):
-        result_df = self.session.create_dataframe(result_df)
-        result_df.write.save_as_table("CORTEX_SEARCH_TABLE", mode="append")
-        print("Data inserted into Snowflake CORTEX_SEARCH_TABLE with Cortex Search format.")
-
+        return chunks_df
+    
+    def store_results_in_snowflake(self, results_df):
+        # Create DataFrame in Snowflake
+        resultsdf = self.session.create_dataframe(results_df)
+        resultsdf.write.save_as_table("CORTEX_SEARCH_TABLE", mode="append")
+        
     def run(self):
-        self.load_pdf_content()
         self.create_database_and_schema()
-        result_df = self.chunk_text()
-        self.store_results_in_snowflake(result_df)
-
+        results_df = self.chunk_text()
+        self.store_results_in_snowflake(results_df)
 
 __all__ = ["CortexSearchModule"]
