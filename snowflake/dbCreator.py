@@ -1,7 +1,8 @@
-from snowflake.snowpark import Session
-from sessions import SnowflakeConnector
-from docParser import DocumentParser
-import pandas as pd
+from utils.sessions import SnowflakeConnector
+from utils.docParser import DocumentParser
+from snowflake.core import Root, CreateMode
+from snowflake.core.database import Database
+from snowflake.core.schema import Schema
 
 """
 CortexSearchModule
@@ -33,43 +34,46 @@ class CortexSearchModule:
         self.session = self.connector.get_session()
 
     def create_database_and_schema(self):
-        root = self.session.create_root()
-        database = root.database.create(
-            name="CORTEX_CONNECT_DB",
-            mode="or_replace"
-        )
-        print("Created database")
-        
-        schema = database.schema.create(
-            name="CORTEX_SEARCH_SCHEMA",
-            mode="or_replace"
-        )
-        print("Created schema")
-       
+        root = Root(self.session)
+        try:
+            database = root.databases.create(
+                Database(name="CORTEX_CONNECT_DB"), mode=CreateMode.or_replace
+            )
+            print("Created databases Successfully")
 
-    def chunk_text(self):
-        document_parser = DocumentParser(
-            path=self.pdf_path,
-            chunk_size=1500,
-            chunk_overlap=256
-        )
-        chunks_df = document_parser.chunkCreator()
+            database.schemas.create(
+                Schema(name="CORTEX_SEARCH_SCHEMA"),
+                mode=CreateMode.or_replace,
+            )
+            print("Created schemas Successfully")
+        except Exception as err:
+            print("Some Error occured while creating database and schema", err)
 
-        # Generate prompts for each chunk
-        chunks_df["prompts"] = chunks_df["CHUNKS"].apply(
-            lambda chunk: f"Given the document content: <chunk content: {chunk}>, identify the relevant category."
-        )
+    async def chunk_text(self):
+        try:
+            document_parser = DocumentParser(
+                path=self.pdf_path, chunk_size=1500, chunk_overlap=256
+            )
+            chunks_df = await document_parser.chunkCreator()
 
-        return chunks_df
-    
+            # Generate prompts for each chunk
+            chunks_df["prompts"] = chunks_df["CHUNKS"].apply(
+                lambda chunk: f"Given the document content: <chunk content: {chunk}>, identify the relevant category."
+            )
+
+            return chunks_df
+        except Exception as err:
+            print("Error occurred while parsing document and creating chunks", {err})
+
     def store_results_in_snowflake(self, results_df):
         # Create DataFrame in Snowflake
         resultsdf = self.session.create_dataframe(results_df)
         resultsdf.write.save_as_table("CORTEX_SEARCH_TABLE", mode="append")
-        
-    def run(self):
+
+    async def run(self):
         self.create_database_and_schema()
-        results_df = self.chunk_text()
+        results_df = await self.chunk_text()
         self.store_results_in_snowflake(results_df)
+
 
 __all__ = ["CortexSearchModule"]

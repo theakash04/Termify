@@ -1,5 +1,6 @@
 from snowflake.snowpark import Session
 import os
+from snowflake.core import Root
 from dotenv import load_dotenv
 
 """
@@ -20,53 +21,52 @@ Usage:
 
 load_dotenv()
 
+
 class SnowflakeConnector:
     def __init__(self):
-        
-        # Set the variables in an .env file 
+
+        # Set the variables in an .env file
         required_env_vars = [
             "SNOWFLAKE_ACCOUNT",
             "SNOWFLAKE_USER",
             "SNOWFLAKE_PASSWORD",
-            "SNOWFLAKE_ROLE"
-            ]
+            "SNOWFLAKE_ROLE",
+        ]
 
-        
         for var in required_env_vars:
             if var not in os.environ:
                 raise ValueError(f"missing required variable {var}")
 
         self.connection_parameters = {
             "account": os.environ["SNOWFLAKE_ACCOUNT"],
-            "user" : os.environ["SNOWFLAKE_USER"],
-            "password" : os.environ["SNOWFLAKE_PASSWORD"] ,
-            "role" : os.environ["SNOWFLAKE_ROLE"],
-            
+            "user": os.environ["SNOWFLAKE_USER"],
+            "password": os.environ["SNOWFLAKE_PASSWORD"],
+            "role": os.environ["SNOWFLAKE_ROLE"],
         }
         self.session = None
 
     def __connect(self):
-            try:
-                self.session = Session.builder.configs(self.connection_parameters).create()
-                print("Connected Successfully")
-            except Exception as e:
-                print(f"Error occurred during connection: {e}")
-                self.session = None
+        try:
+            self.session = Session.builder.configs(self.connection_parameters).create()
+            print("Connected Successfully")
+        except Exception as e:
+            print(f"Error occurred during connection: {e}")
+            self.session = None
 
     def get_session(self):
-            if not self.session:
-                self.__connect()
-            return self.session 
-        
+        if not self.session:
+            self.__connect()
+        return self.session
+
     def close_connection(self):
-            if self.session:
-                try:
-                    self.session.close()
-                    print("Session closed successfully")
-                except Exception as e:
-                    print(f"Error occurred while closing the session: {e}")
-            else:
-                print("No active sessions to close")
+        if self.session:
+            try:
+                self.session.close()
+                print("Session closed successfully")
+            except Exception as e:
+                print(f"Error occurred while closing the session: {e}")
+        else:
+            print("No active sessions to close")
 
 
 __all__ = ["SnowflakeConnector"]
