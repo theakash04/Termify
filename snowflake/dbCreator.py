@@ -3,6 +3,10 @@ from utils.docParser import DocumentParser
 from snowflake.core import Root, CreateMode
 from snowflake.core.database import Database
 from snowflake.core.schema import Schema
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 """
 CortexSearchModule
@@ -37,12 +41,12 @@ class CortexSearchModule:
         root = Root(self.session)
         try:
             database = root.databases.create(
-                Database(name="NEW_CORTEX_CONNECT_DB"), mode=CreateMode.or_replace
+                Database(name=os.environ["SNOWFLAKE_DATABASE"]), mode=CreateMode.or_replace
             )
             print("Created databases Successfully")
 
             database.schemas.create(
-                Schema(name="NEW_CORTEX_SEARCH_SCHEMA"),
+                Schema(name=os.environ["SNOWFLAKE_SCHEMA"]),
                 mode=CreateMode.or_replace,
             )
             print("Created schemas Successfully")
