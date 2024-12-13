@@ -2,11 +2,16 @@
 import sys
 import os
 
-sys.path.append(os.path.abspath(".."))
+# Add the parent, snowflake, and utils directories to sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'snowflake')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'utils')))
 
 import streamlit as st
 from snowflake.core import Root
 from utils.sessions import SnowflakeConnector
+from snowflake.main import RAG
+import asyncio
 
 
 if "sfConnect" not in st.session_state:
@@ -16,19 +21,6 @@ if "sfConnect" not in st.session_state:
 
 
 root = st.session_state.root
-if "my_service" not in st.session_state:
-    st.session_state.my_service = (
-        root.databases["CORTEX_CONNECT"]
-        .schemas["CORTEX_SEARCH_S"]
-        .cortex_search_services["mysearch"]
-    )
-
-
-async def searchQuery(question: str):
-    response = await st.session_state.my_service.search(
-        query=question, columns=["CHUNKS"], limit=5
-    )
-    return response
 
 
 # intialize chat history
@@ -48,8 +40,8 @@ if question := st.chat_input("what is up?"):
     st.session_state.messages.append({"role": "user", "content": question})
 
     # AI response display
-    # response = searchQuery(question)
-    response = f"echo {question}"
+    response = asyncio.run(RAG(question, root))
+    # response = f"echo {question}"
     with st.chat_message("assistant"):
         st.markdown(response)
     st.session_state.messages.append({"role": "assistant", "content": response})

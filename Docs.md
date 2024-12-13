@@ -44,6 +44,7 @@ SNOWFLAKE_DATABASE=databasename
 SNOWFLAKE_SCHEMA=schemaname
 SNOWFLAKE_ROLE=role
 SNOWFLAKE_WAREHOUSE=warehousename
+SNOWFLAKE_CORTEX_SEARCH_SERVICE=yourCortexserviceName
 ```
 
 2. **Sync your branch with master branch**
