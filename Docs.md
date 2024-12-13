@@ -76,21 +76,34 @@ git push -u origin dev/yourname
 
 4. Now go to `github.com` and make a pull request or contribute when making pull request make sure write comment on what you changed point vise
 
-### Steps on how You can create a session with snowfake **Make sure you have created `.env` file in root directory**
-```python
-# Import the class
-from your_module import SnowflakeConnector
-
-# Step 1: Instantiate the class
-connector = SnowflakeConnector()
-
-# Step 2: Connect to Snowflake
-connector.connect()
-
-# Step 3: Retrieve the session
-session = connector.get_session()
-
-# Step 5: Close the connection
-connector.close_connection()
+### How to run `Execute in the root dir`
+- To run streamlit
+```bash
+python run.py app:streamlit
 ```
+- To create Database and schema `running snowflake/main.py`
+```bash
+python run.py app:main
+```
+
+### How to run the app using Docker
+1. First Install docker into your maching
+2. Start or build the app in docker
+    - in root file run (this will build and start the app in docker)
+    ```cmd
+    # use -d before `--build` for running the docker in detached mode
+    docker compose up --build
+    ```
+    - This will start the docker file if it is already built
+    ```cmd
+    docker compose up
+
+    # if you want to run it in detached mode
+    docker compose up -d
+    ```
+    - to stop the docker
+    ```cmd
+    docker compose down
+    ```
+
 

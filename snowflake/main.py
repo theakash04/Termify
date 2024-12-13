@@ -4,7 +4,9 @@ import asyncio
 from dotenv import load_dotenv
 import json
 
-sys.path.append(os.path.abspath(".."))  # Enable imports from the parent directory
+# Add the parent dir to sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from utils.sessions import SnowflakeConnector
 from dbCreator import CortexSearchModule
 
@@ -12,6 +14,8 @@ from dbCreator import CortexSearchModule
 
 # Load environment variables
 load_dotenv()
+
+
 if __name__ == "__main__":
     _connector = SnowflakeConnector()
     _create = input("Do You want to create new Database with a pdf Y/N:  ")
@@ -32,6 +36,8 @@ if __name__ == "__main__":
     else:
         print("Operation aborted as per your choice.")
 
+
+# construct prompt for LLM. It takes question and context as a input and returns prompt
 def construct_prompt(question: str, context: str) -> str:
     prompt = f"""
     You are an expert legal advisor that extracts information from the Context provided. Answer the question below based on the provided context. 
@@ -48,12 +54,12 @@ def construct_prompt(question: str, context: str) -> str:
     """
     return prompt
 
-# def clean_output(output: str) -> str:
-#     return " ".join(output.split())
 
 
-async def RAG(question: str, root=None):
-    if not root:
+# Function to take user questions and fetches relevant information from a database,
+# processes it, and generates an AI-powered response using a language model
+async def RAG(question: str, root, session):
+    if not root and session:
         return "Something unexpected happened. Please try again."
     else:
         my_service = (
@@ -64,11 +70,13 @@ async def RAG(question: str, root=None):
         response = my_service.search(
             query=question, columns=["CHUNKS"], limit=5
         )
+        # converting the response data into json format
         response_data = json.loads(response.json())
         context = ""
         for i in range(len(response_data["results"])):
             context += response_data["results"][i]["CHUNKS"]
-        session = SnowflakeConnector().get_session()
+
+        # constructing prompt and connecting to llm model using sql in snowflake 
         prompt = construct_prompt(question, context)
         cmd = """select snowflake.cortex.complete(?, ?) as response"""
         model = 'mistral-large2'
