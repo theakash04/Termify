@@ -14,14 +14,13 @@ from snowflake.main import RAG
 import asyncio
 
 
-if "sfConnect" not in st.session_state:
-    st.session_state.sfConnect = SnowflakeConnector()
-    session = st.session_state.sfConnect.get_session()
-    st.session_state.root = Root(session)
+st.session_state.setdefault("sfConnect", SnowflakeConnector())
+st.session_state.setdefault("session", st.session_state.sfConnect.get_session())
+st.session_state.setdefault("root", Root(st.session_state.session))
 
-
+# Access variables
+session = st.session_state.session
 root = st.session_state.root
-
 
 # intialize chat history
 if "messages" not in st.session_state:
@@ -40,7 +39,7 @@ if question := st.chat_input("what is up?"):
     st.session_state.messages.append({"role": "user", "content": question})
 
     # AI response display
-    response = asyncio.run(RAG(question, root))
+    response = asyncio.run(RAG(question, root, session))
     # response = f"echo {question}"
     with st.chat_message("assistant"):
         st.markdown(response)
