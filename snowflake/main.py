@@ -10,7 +10,7 @@ import asyncio
 
 connector = SnowflakeConnector()
 
-pdf_path = "/home/akash/Downloads/BNS-PDF-Download.pdf"
+pdf_path = "/home/pranav/snowflake/BNS-PDF-Download.pdf"
 
 cortex_search = CortexSearchModule(connector, pdf_path)
 
