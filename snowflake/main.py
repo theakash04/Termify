@@ -1,10 +1,11 @@
 import sys
 import os
+sys.path.append(os.path.abspath("..")) # Enable imports from the parent directory
 from utils.sessions import SnowflakeConnector
 from dbCreator import CortexSearchModule
 import asyncio
 
-sys.path.append(os.path.abspath("..")) # Enable imports from the parent directory
+
 
 
 connector = SnowflakeConnector()
