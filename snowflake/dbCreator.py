@@ -37,12 +37,12 @@ class CortexSearchModule:
         root = Root(self.session)
         try:
             database = root.databases.create(
-                Database(name="CORTEX_CONNECT_DB"), mode=CreateMode.or_replace
+                Database(name="NEW_CORTEX_CONNECT_DB"), mode=CreateMode.or_replace
             )
             print("Created databases Successfully")
 
             database.schemas.create(
-                Schema(name="CORTEX_SEARCH_SCHEMA"),
+                Schema(name="NEW_CORTEX_SEARCH_SCHEMA"),
                 mode=CreateMode.or_replace,
             )
             print("Created schemas Successfully")
@@ -57,7 +57,7 @@ class CortexSearchModule:
             chunks_df = await document_parser.chunkCreator()
 
             # Generate prompts for each chunk
-            chunks_df["prompts"] = chunks_df["CHUNKS"].apply(
+            chunks_df["PROMPTS"] = chunks_df["CHUNKS"].apply(
                 lambda chunk: f"Given the document content: <chunk content: {chunk}>, identify the relevant category."
             )
 
