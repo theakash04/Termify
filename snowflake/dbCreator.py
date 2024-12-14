@@ -1,10 +1,13 @@
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from utils.sessions import SnowflakeConnector
 from utils.docParser import DocumentParser
 from snowflake.core import Root, CreateMode
 from snowflake.core.database import Database
 from snowflake.core.schema import Schema
 from dotenv import load_dotenv
-import os
+from utils.secret_loader import get_secret
 
 load_dotenv()
 
@@ -41,12 +44,12 @@ class CortexSearchModule:
         root = Root(self.session)
         try:
             database = root.databases.create(
-                Database(name=os.environ["SNOWFLAKE_DATABASE"]), mode=CreateMode.or_replace
+                Database(name=get_secret("SNOWFLAKE_DATABASE")), mode=CreateMode.or_replace
             )
             print("Created databases Successfully")
 
             database.schemas.create(
-                Schema(name=os.environ["SNOWFLAKE_SCHEMA"]),
+                Schema(name=get_secret("SNOWFLAKE_SCHEMA")),
                 mode=CreateMode.or_replace,
             )
             print("Created schemas Successfully")

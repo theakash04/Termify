@@ -3,6 +3,8 @@ import os
 from snowflake.core import Root
 from dotenv import load_dotenv
 
+from utils.secret_loader import get_secret
+
 """
 SnowflakeConnector
 
@@ -34,14 +36,14 @@ class SnowflakeConnector:
         ]
 
         for var in required_env_vars:
-            if var not in os.environ:
+            if not get_secret(var):
                 raise ValueError(f"missing required variable {var}")
 
         self.connection_parameters = {
-            "account": os.environ["SNOWFLAKE_ACCOUNT"],
-            "user": os.environ["SNOWFLAKE_USER"],
-            "password": os.environ["SNOWFLAKE_PASSWORD"],
-            "role": os.environ["SNOWFLAKE_ROLE"],
+            "account": get_secret("SNOWFLAKE_ACCOUNT"),
+            "user": get_secret("SNOWFLAKE_USER"),
+            "password": get_secret("SNOWFLAKE_PASSWORD"),
+            "role": get_secret("SNOWFLAKE_ROLE"),
         }
         self.session = None
 
