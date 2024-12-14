@@ -1,17 +1,22 @@
 import os
 import streamlit as st
+from dotenv import load_dotenv
 
 def get_secret(key: str):
-    """Fetch secret from Streamlit secrets or fallback to environment variables."""
-    secrets_file_path = os.path.join(os.getcwd(), ".streamlit", "secrets.toml")
-    if not os.path.exists(secrets_file_path):
-        return os.environ[key]
-    # Use st.secrets only if the file exists and the key is present
+    """Fetch secret from environment variables or fallback to Streamlit secrets."""
+    secret_value = os.environ[key]
+    if secret_value:
+        return secret_value
+
+    # if not found in env
     try:
         if key in st.secrets:
             return st.secrets[key]
     except FileNotFoundError:
-        pass  # Silently skip st.secrets if secrets.toml doesn't exist
+        pass
 
+    return None
+
+  
 
 __all__ = ["get_secret"]
