@@ -9,7 +9,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from utils.sessions import SnowflakeConnector
 from dbCreator import CortexSearchModule
-
+from utils.secret_loader import get_secret
 
 
 # Load environment variables
@@ -63,9 +63,9 @@ async def RAG(question: str, root, session):
         return "Something unexpected happened. Please try again."
     else:
         my_service = (
-            root.databases[os.environ["SNOWFLAKE_DATABASE"]]
-            .schemas[os.environ["SNOWFLAKE_SCHEMA"]]
-            .cortex_search_services[os.environ["SNOWFLAKE_CORTEX_SEARCH_SERVICE"]]
+            root.databases[get_secret("SNOWFLAKE_DATABASE")]
+            .schemas[get_secret("SNOWFLAKE_SCHEMA")]
+            .cortex_search_services[get_secret("SNOWFLAKE_CORTEX_SEARCH_SERVICE")]
         )
         response = my_service.search(
             query=question, columns=["CHUNKS"], limit=5

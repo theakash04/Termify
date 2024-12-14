@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8501:8501" # Map the container's port 8501 to your host machine's port 8501
+    env_file: 
+      - .env
     environment:
       - PYTHONUNBUFFERED=1 # Ensure Python output is flushed immediately
     healthcheck:
