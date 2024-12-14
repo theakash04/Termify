@@ -13,13 +13,15 @@ from utils.sessions import SnowflakeConnector
 from snowflake.main import RAG
 import asyncio
 
+if "session" not in st.session_state:
+    sfConnect = SnowflakeConnector()
+    st.session_state.session = sfConnect.get_session()
 
-st.session_state.setdefault("sfConnect", SnowflakeConnector())
-st.session_state.setdefault("session", st.session_state.sfConnect.get_session())
-st.session_state.setdefault("root", Root(st.session_state.session))
-
-# Access variables
 session = st.session_state.session
+
+if "root" not in st.session_state:
+    st.session_state.root = Root(session)
+
 root = st.session_state.root
 
 # intialize chat history
