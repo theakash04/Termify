@@ -13,6 +13,7 @@ from utils.sessions import SnowflakeConnector
 from snowflake.main import RAG
 import asyncio
 
+# session state for better user experience
 if "session" not in st.session_state:
     sfConnect = SnowflakeConnector()
     st.session_state.session = sfConnect.get_session()
@@ -33,8 +34,19 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
+# home page text shown only on first loads
+if "first_load" not in st.session_state:
+    st.session_state.first_load = True
+
+if st.session_state.first_load:
+    st.title("Welcome to :blue[LegalBot] ⚖️")
+    st.info("Get quick answers to general legal questions.")
+    st.markdown('**Example:** "What are the rights of a women?"')
+    st.divider()
+    st.session_state.first_load = False
+
 # React on user Input
-if question := st.chat_input("what is up?"):
+if question := st.chat_input("what do you want to know?"):
     # user question display
     with st.chat_message("user"):
         st.markdown(question)
