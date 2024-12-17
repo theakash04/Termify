@@ -157,7 +157,3 @@ SNOWFLAKE_CORTEX_SEARCH_SERVICE = "yourCortexserviceName"
 
 This approach is especially useful for securely managing secrets in Streamlit applications.
 
----
-
-Feel free to contribute and enhance this guide as needed! Happy coding! 🚀
-
