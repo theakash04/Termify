@@ -8,9 +8,9 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 's
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'utils')))
 
 import streamlit as st
-from snowflake.core import Root
+from snowflake.core._root import Root
 from utils.sessions import SnowflakeConnector
-from snowflake.main import RAG
+from snowflake.main import snowflakeChatApp
 import asyncio
 
 # session state for better user experience
@@ -24,6 +24,10 @@ if "root" not in st.session_state:
     st.session_state.root = Root(session)
 
 root = st.session_state.root
+
+# initializing snowflake chatapp with session
+if "sfChatApp" not in st.session_state:
+    st.session_state.sfChatApp = snowflakeChatApp(root, session)
 
 # intialize chat history
 if "messages" not in st.session_state:
@@ -53,11 +57,13 @@ if question := st.chat_input("what do you want to know?"):
     st.session_state.messages.append({"role": "user", "content": question})
 
     # AI response display
-    response = asyncio.run(RAG(question, root, session))
+    response = asyncio.run(
+        st.session_state.sfChatApp.RAG(question)
+    )
     # response = f"echo {question}"
     with st.chat_message("assistant"):
-        st.markdown(response)
-    st.session_state.messages.append({"role": "assistant", "content": response})
+        st.markdown(response["response"])
+    st.session_state.messages.append({"role": "assistant", "content": response["response"]})
 
 
 def clearChat():

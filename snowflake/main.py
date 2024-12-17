@@ -3,6 +3,7 @@ import os
 import asyncio
 from dotenv import load_dotenv
 import json
+from typing import Dict
 
 # Add the parent dir to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -51,35 +52,40 @@ def construct_prompt(question: str, context: str) -> str:
 
 
 
-# Function to take user questions and fetches relevant information from a database,
-# processes it, and generates an AI-powered response using a language model
-async def RAG(question: str, root, session):
-    if not root and session:
-        return "Something unexpected happened. Please try again."
-    else:
-        my_service = (
-            root.databases[get_secret("SNOWFLAKE_DATABASE")]
-            .schemas[get_secret("SNOWFLAKE_SCHEMA")]
-            .cortex_search_services[get_secret("SNOWFLAKE_CORTEX_SEARCH_SERVICE")]
-        )
-        response = my_service.search(
-            query=question, columns=["CHUNKS"], limit=5
-        )
-        # converting the response data into json format
-        response_data = json.loads(response.json())
-        context = ""
-        for i in range(len(response_data["results"])):
-            context += response_data["results"][i]["CHUNKS"]
+class snowflakeChatApp():
+    def __init__(self, root, session):
+        self.root = root
+        self.session = session
 
-        # constructing prompt and connecting to llm model using sql in snowflake 
-        prompt = construct_prompt(question, context)
-        cmd = """select snowflake.cortex.complete(?, ?) as response"""
-        model = 'mistral-large2'
-        result = session.sql(cmd, params=[model, prompt]).collect()
-        llm_output = result[0]['RESPONSE']
-        return llm_output
+    async def RAG(self, question) -> Dict:
+        if not self.root and self.session:
+            return {"input": question, "response": "Something unexpected happened. Please try again."}
+        else:
+            my_service = (
+                self.root.databases[get_secret("SNOWFLAKE_DATABASE")]
+                .schemas[get_secret("SNOWFLAKE_SCHEMA")]
+                .cortex_search_services[get_secret("SNOWFLAKE_CORTEX_SEARCH_SERVICE")]
+            )
+            response = my_service.search(
+                query=question, columns=["CHUNKS"], limit=5
+            )
+            # converting the response data into json format
+            response_data = json.loads(response.json())
+            context = ""
+            for i in range(len(response_data["results"])):
+                context += response_data["results"][i]["CHUNKS"]
+
+            # constructing prompt and connecting to llm model using sql in snowflake 
+            prompt = construct_prompt(question, context)
+            cmd = """select snowflake.cortex.complete(?, ?) as response"""
+            model = 'mistral-large2'
+            result = self.session.sql(cmd, params=[model, prompt]).collect()
+            llm_output = result[0]['RESPONSE']
+            return {"input": question, "response": llm_output}
 
 
 
-__all__ = ["RAG"]
+
+
+__all__ = ["snowflakeChatApp"]
 

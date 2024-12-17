@@ -29,7 +29,7 @@ Usage:
 class DocumentParser:
     def __init__(
         self,
-        path="/home/pranav/snowflake/Lorem_ipsum.pdf",
+        path=None,
         chunk_size=1500,
         chunk_overlap=256,
     ):
