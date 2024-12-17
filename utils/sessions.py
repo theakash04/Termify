@@ -1,6 +1,4 @@
 from snowflake.snowpark import Session
-import os
-from snowflake.core import Root
 from dotenv import load_dotenv
 
 from utils.secret_loader import get_secret
