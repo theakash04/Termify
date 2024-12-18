@@ -33,6 +33,11 @@ Usage:
    cortex_search = CortexSearchModule(connector, pdf_path)
 """
 
+CORTEX_SERVICE_NAME = get_secret("SNOWFLAKE_CORTEX_SEARCH_SERVICE")
+WAREHOUSE = get_secret("SNOWFLAKE_WAREHOUSE")
+DATABASE = get_secret("SNOWFLAKE_DATABASE")
+SCHEMA = get_secret("SNOWFLAKE_SCHEMA")
+CORTEX_SEARCH_TABLE_NAME = "LAW_TABLE"
 
 class CortexSearchModule:
     def __init__(self, connector: SnowflakeConnector, pdf_path: str):
@@ -41,15 +46,16 @@ class CortexSearchModule:
         self.session = self.connector.get_session()
 
     def create_database_and_schema(self):
+        """Creates or replaces the Snowflake database and schema."""
         root = Root(self.session)
         try:
             database = root.databases.create(
-                Database(name=get_secret("SNOWFLAKE_DATABASE")), mode=CreateMode.or_replace
+                Database(name=DATABASE), mode=CreateMode.or_replace
             )
             print("Created databases Successfully")
 
             database.schemas.create(
-                Schema(name=get_secret("SNOWFLAKE_SCHEMA")),
+                Schema(name=SCHEMA),
                 mode=CreateMode.or_replace,
             )
             print("Created schemas Successfully")
@@ -57,30 +63,56 @@ class CortexSearchModule:
             print("Some Error occured while creating database and schema", err)
 
     async def chunk_text(self):
+        """Parses the PDF and creates text chunks."""
         try:
             document_parser = DocumentParser(
-                path=self.pdf_path, chunk_size=1500, chunk_overlap=256
+                path=self.pdf_path, chunk_size=512, chunk_overlap=256
             )
             chunks_df = await document_parser.chunkCreator()
-
-            # Generate prompts for each chunk
-            chunks_df["PROMPTS"] = chunks_df["CHUNKS"].apply(
-                lambda chunk: f"Given the document content: <chunk content: {chunk}>, identify the relevant category."
-            )
 
             return chunks_df
         except Exception as err:
             print("Error occurred while parsing document and creating chunks", {err})
 
     def store_results_in_snowflake(self, results_df):
+         """Stores the results in a Snowflake table."""
         # Create DataFrame in Snowflake
         resultsdf = self.session.create_dataframe(results_df)
-        resultsdf.write.save_as_table("CORTEX_SEARCH_TABLE", mode="append")
+        resultsdf.write.save_as_table(CORTEX_SEARCH_TABLE_NAME, mode="append")
+
+    def create_cortex_search_service(self):
+        """Creates or replaces the Cortex Search Service in Snowflake."""
+
+        #NOTE: we can add attributes for filtering of data using a column in table but RN we only have one column in table
+        try:
+            self.session.sql(f"USE DATABASE {DATABASE}").collect()
+            self.session.sql(f"USE SCHEMA {SCHEMA}").collect()
+            cmd =f"""
+            CREATE OR REPLACE CORTEX SEARCH SERVICE {CORTEX_SERVICE_NAME}
+              ON CHUNKS
+              WAREHOUSE = {WAREHOUSE}
+              TARGET_LAG = '1 hour'
+              EMBEDDING_MODEL = 'snowflake-arctic-embed-l-v2.0'
+            AS (
+              SELECT
+                  CHUNKS
+              FROM {CORTEX_SEARCH_TABLE_NAME}
+            );
+            """
+            self.session.sql(cmd).collect()
+            print(f"Cortex Search service '{CORTEX_SERVICE_NAME}' created successfully in database '{DATABASE}' and schema '{SCHEMA}'.")
+        except Exception as err:
+            print(f"Something happen while creating cortex search service {CORTEX_SERVICE_NAME} in database {DATABASE} and schema {SCHEMA} \n")
+            print(err)
 
     async def run(self):
+        """Executes the full workflow: database/schema setup, chunking, storing results, and creating the search service."""
         self.create_database_and_schema()
         results_df = await self.chunk_text()
         self.store_results_in_snowflake(results_df)
+        # creating cortex search service after creating a new databse
+        print("Initializing Cortex Search Service... This might take a few moments.")
+        self.create_cortex_search_service()
 
 
 __all__ = ["CortexSearchModule"]
