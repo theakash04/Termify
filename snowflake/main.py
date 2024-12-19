@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 import json
 from typing import Dict
 
+from langchain_community.document_loaders import pdf
+
 # Add the parent dir to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -29,7 +31,6 @@ if __name__ == "__main__":
             if os.path.exists(_pdf_path) and os.path.isfile(_pdf_path):
                 _cortex_search = CortexSearchModule(_connector, _pdf_path)
                 asyncio.run(_cortex_search.run())
-                print("Successfully parsed PDF data!")
             else:
                 print(f"The file '{_pdf_path}' does not exist.")
         except Exception as err:
