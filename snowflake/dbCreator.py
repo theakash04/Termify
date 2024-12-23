@@ -75,7 +75,7 @@ class CortexSearchModule:
             print("Error occurred while parsing document and creating chunks", {err})
 
     def store_results_in_snowflake(self, results_df):
-         """Stores the results in a Snowflake table."""
+        """Stores the results in a Snowflake table."""
         # Create DataFrame in Snowflake
         resultsdf = self.session.create_dataframe(results_df)
         resultsdf.write.save_as_table(CORTEX_SEARCH_TABLE_NAME, mode="append")
