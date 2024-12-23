@@ -42,8 +42,8 @@ if __name__ == "__main__":
 # construct prompt for LLM. It takes question and context as a input and returns prompt
 def construct_prompt(question: str, context: str) -> str:
     prompt = f"""
-    You are an expert legal advisor. Answer questions briefly and accurately based on the provided context. If the answer is not available, say, "I do not have an answer to that." Do not mention the process or context in your responses.
-    At the end of each session, summarize the discussion with a clear statement like, "To conclude, we can say..." or a similar closing.
+    You are an expert legal advisor. Answer questions briefly and accurately based on the provided context. If the answer is not available, say, "I do not have an answer to that."
+    Do not mention the process or context in your responses.
     You can also reply to casual greetings like "Hi," "Hello," or "How are you?" appropriately.
     Context: {context}
     Question: {question}
