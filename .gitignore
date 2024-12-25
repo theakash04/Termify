@@ -22,4 +22,4 @@ snowflake/tru_temp.py
 default.sqlite
 
 # Devcontainer files
-.devcontainer
+.devcontainer/
