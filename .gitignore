@@ -1,7 +1,25 @@
-*.env
+# Environment files
+.env
+
+# Jupyter Notebook checkpoints
 .ipynb_checkpoints
+
+# Python cache files
 __pycache__
+
+# Python virtual environments
 .venv
-notebook.ipynb
 .snow
+
+# Jupyter Notebook files
+*.ipynb
+
+# Snowflake-related files
+snowflake/tru_temp.py
+
+# SQLite database files
+*.sqlite
+default.sqlite
+
+# Devcontainer files
 .devcontainer
