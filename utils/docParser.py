@@ -1,6 +1,7 @@
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
 import pandas as pd
+import re
 
 """
 DocumentParser Class:
@@ -57,20 +58,43 @@ class DocumentParser:
         except Exception as e:
             raise RuntimeError(f"An error occurred while loading the document: {e}")
 
+    async def clean_text(self, chunks):
+        cleaned_chunks = []
+        for chunk in chunks:
+            try:
+
+                cleaned_chunk = re.sub(r"[^a-zA-Z0-9\s]", "", chunk)
+
+                cleaned_chunk = re.sub(r"\s+", " ", cleaned_chunk).strip()
+
+                cleaned_chunks.append(cleaned_chunk)
+            except Exception as e:
+                print(f"An error occurred while cleaning a chunk: {e}")
+                cleaned_chunks.append(chunk)
+
+        return cleaned_chunks
+
     # Method to divide the PDF into chunks
     async def chunkCreator(self):
-        doc_text = await self.__pdfLoader(self.path)
+        try:
+            # Load the document
+            doc_text = await self.__pdfLoader(self.path)
 
-        text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=self.chunk_size,
-            chunk_overlap=self.chunk_overlap,
-            length_function=len,
-        )
+            # Split the document into chunks using RecursiveCharacterTextSplitter
+            text_splitter = RecursiveCharacterTextSplitter(
+                chunk_size=self.chunk_size,
+                chunk_overlap=self.chunk_overlap,
+                length_function=len,
+            )
 
-        chunks = text_splitter.split_text(doc_text)
-        chunks_data_frame = pd.DataFrame(chunks, columns=["CHUNKS"])
+            chunks = text_splitter.split_text(doc_text)
+            cleaned_chunks = await self.clean_text(chunks)
+            chunks_data_frame = pd.DataFrame(cleaned_chunks, columns=["CHUNKS"])
 
-        return chunks_data_frame
+            return chunks_data_frame
+
+        except Exception as e:
+            raise RuntimeError(f"An error occurred while processing the document: {e}")
 
 
 __all__ = ["DocumentParser"]
