@@ -1,6 +1,9 @@
 import subprocess
 import sys
 import argparse
+from pathlib import Path
+
+current_dir = Path.cwd()
 
 def run_streamlit():
     """Function to run Streamlit app"""
@@ -17,6 +20,15 @@ def run_snowflake():
         subprocess.run([sys.executable, "snowflake/main.py"])
     except KeyboardInterrupt:
         print("\nKeyboardInterrupted Execution stopped.")
+    
+def run_trulens():
+    """Function to run trulens/main.py script"""
+    print("Running trulens main.py...")
+    try:
+        subprocess.run([sys.executable, "-u", f"{current_dir}/snowflake/trulens_eval.py"])
+    except KeyboardInterrupt:
+        print("\nKeyboardInterrupted Execution stopped.")
+
 
 def main():
     parser = argparse.ArgumentParser(description="Run Streamlit or Snowflake app.")
@@ -27,14 +39,19 @@ def main():
 
     # Subcommand for running Snowflake main script
     subparsers.add_parser('app:main', help="Run snowflake main.py")
+    
+    # Subcommand for running Trulens main script
+    subparsers.add_parser('app:trulens', help="Run trulens main.py")
 
     args = parser.parse_args()
     if args.command == 'app:streamlit':
         run_streamlit()
     elif args.command == 'app:main':
         run_snowflake()
+    elif args.command == 'app:trulens':
+        run_trulens()
     else:
-        print("Invalid command. Use 'app:streamlit' or 'app:main'.")
+        print("Invalid command. Use 'app:streamlit' or 'app:main' or 'app:trulens'.")
 
 if __name__ == "__main__":
     main()
