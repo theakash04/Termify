@@ -14,12 +14,13 @@ __pycache__
 # Jupyter Notebook files
 *.ipynb
 
-# Snowflake-related files
-snowflake/tru_temp.py
-
 # SQLite database files
 *.sqlite
-default.sqlite
 
 # Devcontainer files
 .devcontainer/
+
+# Developer Docs
+Docs.md
+
+# others

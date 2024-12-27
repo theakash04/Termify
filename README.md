@@ -10,7 +10,8 @@ Welcome to the AI ChatApp developer repository! This guide provides detailed ins
 4. [Running the Application](#4-running-the-application)
    - [Using Python](#using-python)
    - [Using Docker](#using-docker)
-5. [Alternative to ](#alternative-to-env-files)[`.env`](#alternative-to-env-files)[ Files](#alternative-to-env-files)
+5. [Evaluating your model](#5-evaluating-your-model)
+6. [Alternative to ](#alternative-to-env-files)[`.env`](#alternative-to-env-files)[ Files](#alternative-to-env-files)
 
 ---
 
@@ -129,8 +130,17 @@ python run.py app:main
    ```
 
 ---
+## 5. Evaluating your model
+To evaluate your model, run the following command:
+```bash
+python run.py app:trulens
+```
 
-## 5. Alternative to `.env` Files
+This command will run trulens which helps in evaluating the model. just write your question on which you want your model to be evaluated and it will start an streamlit app where you can see the results and evaluation graph of your model respective to the answer, context and other parameters.
+
+---
+
+## 6. Alternative to `.env` Files
 
 Instead of using a `.env` file, you can use `secrets.toml` for managing environment variables. Create a `.streamlit` folder in the root directory and add a `secrets.toml` file:
 
