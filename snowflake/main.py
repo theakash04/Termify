@@ -2,8 +2,6 @@ import sys
 import os
 import asyncio
 from dotenv import load_dotenv
-import json
-from typing import Dict
 
 from langchain_community.document_loaders import pdf
 
@@ -13,7 +11,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from utils.sessions import SnowflakeConnector
 from dbCreator import CortexSearchModule
 from utils.secret_loader import get_secret
-from trulens.apps.custom import instrument
 
 # Load environment variables
 load_dotenv()
@@ -45,7 +42,7 @@ class RAG:
         self.session = session
         self._limit_to_retirve = limit_to_retirve
 
-    @instrument
+
     def retrieve_context(self, query: str) -> dict:
         if not self.root or not self.session:
             return {
@@ -85,10 +82,8 @@ class RAG:
         cmd = """select snowflake.cortex.complete(?, ?) as response"""
         model = 'mistral-large2'
         result = self.session.sql(cmd, params=[model, prompt]).collect()
-        print(result)
         return result[0]['RESPONSE']
 
-    @instrument
     def query(self, query: str) -> str:
         context_str = self.retrieve_context(query)
         return self.generate_completion(query, context_str)

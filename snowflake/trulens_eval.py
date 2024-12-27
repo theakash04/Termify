@@ -23,10 +23,38 @@ class RAG(RAG):
         self.session = session
         self._limit_to_retirve = limit_to_retirve
 
+    @instrument        
+    def retrieve_context(self, query: str) -> dict:
+        if not self.root or not self.session:
+            return {
+                "input": query,
+                "response": "Something unexpected happened. Contact customer support.",
+            }
+
+        # Accessing the Snowflake Cortex search service
+        my_service = (
+            self.root.databases[get_secret("SNOWFLAKE_DATABASE")]
+            .schemas[get_secret("SNOWFLAKE_SCHEMA")]
+            .cortex_search_services[get_secret("SNOWFLAKE_CORTEX_SEARCH_SERVICE")]
+        )
+
+        # Searching and building context
+        resp = my_service.search(query=query, columns=["CHUNKS"], limit=self._limit_to_retirve)
+
+        if resp.results:
+            return [curr["CHUNKS"] for curr in resp.results]
+        else:
+            return []
+
     @instrument
     def generate_completion(self, query: str, context_str: str) -> str:
         prompt = self.create_prompt(query, context_str)
         return Complete("mistral-large2", prompt)
+
+    @instrument
+    def query(self, query: str) -> str:
+        context_str = self.retrieve_context(query)
+        return self.generate_completion(query, context_str)
 
 
 query = input("Ask a question: ")
