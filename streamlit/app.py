@@ -124,7 +124,8 @@ if query := st.chat_input("Hello Termify!"):
         st.markdown(query)
         st.session_state.messages.append(message("user", query))
 
-    response = st.session_state.sfChatApp.query(query)
+    with st.spinner("Let me figure that out for you..."):
+        response = st.session_state.sfChatApp.query(query)
 
     with st.chat_message("assistant"):
         st.write_stream(stream_output(response))
