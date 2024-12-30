@@ -68,7 +68,6 @@ else:
     root = Root(session)
     rag = RAG(root, session)
     sess_Tru = TruSession()
-    
 
     data = {
         "query": [

@@ -2,16 +2,12 @@ import sys
 import os
 import asyncio
 from dotenv import load_dotenv
-
-from langchain_community.document_loaders import pdf
-
 # Add the parent dir to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from utils.sessions import SnowflakeConnector
 from dbCreator import CortexSearchModule
 from utils.secret_loader import get_secret
-
 
 # Load environment variables
 load_dotenv()
@@ -59,25 +55,18 @@ class RAG:
         )
 
         # Searching and building context
-        resp = my_service.search(query=query, columns=["CORE1", "CORE2", "CORE3", "WHAT1", "WHAT2", "WHAT3", "WHAT4", "WHAT5", "WHAT6", "WHAT7"], limit=self._limit_to_retirve)
+        resp = my_service.search(query=query, columns=["CHUNKS"], limit=self._limit_to_retirve)
 
         if resp.results:
-            non_empty_keys = []
-
-            # Iterating through results and extracting non-empty keys
-            for item in resp.results:
-                keys = [key for key, value in item.items() if value]
-                non_empty_keys.append({key: item[key] for key in keys})
-            return [value for item in non_empty_keys for value in item.values()]
+            return [curr["CHUNKS"] for curr in resp.results]
         else:
             return []
 
     def create_prompt(self, query:str, context_str: list)-> str:
         prompt = f"""
-            You are an expert assistant for understanding copyrighted documents. Offer clear and precise responses based solely on the given text.
-            If the answer is not found in the provided content, say you don’t have the information.
+            You are an expert legal advisor. Answer questions briefly and accurately based on the provided context.
+            If you don´t have the information just say so.
             Avoid referring to the document as copyrighted or mentioning how you process it.
-            Ensure your responses are factual and do not hallucinate information.
             Respond politely to casual greetings if they are included in the input.
             Context: {context_str}
             Question: {query}
@@ -94,8 +83,7 @@ class RAG:
 
     def query(self, query: str) -> str:
         context_str = self.retrieve_context(query)
-        llm = self.generate_completion(query, context_str)
-        return llm
+        return self.generate_completion(query, context_str)
 
 
 __all__ = ["RAG"]
