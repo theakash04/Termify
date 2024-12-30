@@ -23,7 +23,7 @@ class RAG(RAG):
         self.session = session
         self._limit_to_retirve = limit_to_retirve
 
-    @instrument        
+    @instrument
     def retrieve_context(self, query: str) -> dict:
         if not self.root or not self.session:
             return {
@@ -167,8 +167,8 @@ else:
     # Initializing the TruCustomApp
     tru_rag = TruCustomApp(
         rag,
-        app_name="snowflake LawAdvicer",
-        app_version="v1.1",
+        app_name="Termify",
+        app_version="v1.2",
         feedbacks=[f_answer_relevance, f_context_relevance, f_coherence],
     )
 
