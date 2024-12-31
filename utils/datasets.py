@@ -15,13 +15,44 @@ USER_DATASET_FOLDER = get_secret("USER_DATASET_FOLDER")
 USER_DATASET_FOLDER_OUTPUT = get_secret("USER_DATASET_FOLDER_OUTPUT")
 
 
-class JSONToCSVProcessor:
+class FileProcessor:
+    """
+    FileProcessor:
+
+    A class that processes files from a specified directory, extracting and chunking text content from JSON and PDF files. 
+    The extracted chunks are saved into a CSV file for further analysis.
+
+    Attributes:
+        folder_path (str): The directory containing the files to be processed.
+        output_csv_path (str): The path to the CSV file where processed data will be saved.
+        chunk_size (int): The maximum size of each text chunk.
+        chunk_overlap (int): The overlap size between consecutive text chunks.
+        pdf_data (list): A list to store the text extracted from PDF files.
+
+    Methods:
+        clean_json(json_content):
+            Recursively cleans JSON content by removing non-alphanumeric characters.
+        
+        clean_text(chunks):
+            Cleans each text chunk by removing non-alphanumeric characters and extra spaces.
+        
+        chunk_creator(text):
+            Splits the given text into chunks based on the specified chunk size and overlap.
+        
+        extract_pdf_text(pdf_path):
+            Extracts text content from a PDF file using PyPDFLoader.
+        
+        process():
+            Processes all files in the folder path, extracting and chunking JSON and PDF content.
+            Writes the processed chunks to a CSV file.
+    """
+
     def __init__(self, folder_path, output_csv_path, chunk_size, chunk_overlap):
         self.folder_path = folder_path
         self.output_csv_path = output_csv_path
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
-        self.pdf_data = []  # List to store PDF data
+        self.pdf_data = []
 
     async def clean_json(self, json_content):
         def recursive_clean(obj):
@@ -68,7 +99,6 @@ class JSONToCSVProcessor:
             pages = []
             async for page in loader.alazy_load():
                 pages.append(page.page_content)
-               
             page_text = "' ".join(pages)
             return page_text
         except Exception as e:
@@ -101,9 +131,7 @@ class JSONToCSVProcessor:
                                 print(f"Found PDF file: {file_full_path}")
                                 pdf_text = await self.extract_pdf_text(file_full_path) 
 
-                                # Store PDF text in the list
                                 if pdf_text:
-                                    self.pdf_data.append(pdf_text)
                                     chunks_df = await self.chunk_creator(pdf_text)
                                     for chunk in chunks_df["CHUNKS"]:
                                         writer.writerow([folder_name, chunk])
@@ -118,7 +146,7 @@ async def main():
     folder_path = USER_DATASET_FOLDER
     output_csv_path = USER_DATASET_FOLDER_OUTPUT
 
-    processor = JSONToCSVProcessor(
+    processor = FileProcessor(
         folder_path=folder_path,
         output_csv_path=output_csv_path,
         chunk_size=1000,
