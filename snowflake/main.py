@@ -2,9 +2,6 @@ import sys
 import os
 import asyncio
 from dotenv import load_dotenv
-
-from langchain_community.document_loaders import pdf
-
 # Add the parent dir to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -69,8 +66,8 @@ class RAG:
         prompt = f"""
             You are an expert legal advisor. Answer questions briefly and accurately based on the provided context.
             If you don´t have the information just say so.
-            Do not mention the process or context in your responses.
-            You can also reply to casual greetings like "Hi," "Hello," or "How are you?" appropriately.
+            Avoid referring to the document as copyrighted or mentioning how you process it.
+            Respond politely to casual greetings if they are included in the input.
             Context: {context_str}
             Question: {query}
             Answer:

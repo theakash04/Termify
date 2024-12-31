@@ -1,6 +1,6 @@
-# SNOWFLAKE CHATAPP
+# TERMIFY
 
-Welcome to the AI ChatApp developer repository! This guide provides detailed instructions on setting up your development environment, managing dependencies, and contributing to the project.
+**Termify** is an AI-powered chatbot designed to help users easily understand the terms and conditions, privacy policies, and related documents of various companies. By providing concise and accurate explanations, Termify simplifies complex legal jargon, making it accessible for everyone.
 
 ## Table of Contents
 
