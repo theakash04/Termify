@@ -53,13 +53,14 @@ class RAG:
 
     def create_prompt(self, query:str, context_str: list)-> str:
         prompt = f"""
-            You are an expert legal advisor. Answer questions briefly and accurately based on the provided context.
-            If you don´t have the information just say so.
-            Avoid referring to the document as copyrighted or mentioning how you process it.
-            Respond politely to casual greetings if they are included in the input.
-            Context: {context_str}
-            Question: {query}
-            Answer:
+        You are an expert assistant for interpreting privacy policies and terms and conditions of various companies. Provide clear, accurate, and detailed answers strictly based on the provided context.
+        If the answer is not in the context, say you don’t have the information.
+        Do not reference about the context or explain how it is processed.
+        Ensure all responses are factual and avoid hallucinating information.
+        Respond courteously to casual greetings.
+        Context: {context_str}
+        Question: {query}
+        Answer:
         """
         return prompt
 
@@ -69,6 +70,7 @@ class RAG:
         model = 'mistral-large2'
         result = self.session.sql(cmd, params=[model, prompt]).collect()
         return result[0]['RESPONSE']
+
 
     def query(self, query: str) -> str:
         context_str = self.retrieve_context(query)
