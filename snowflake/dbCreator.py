@@ -37,10 +37,10 @@ CORTEX_SERVICE_NAME = get_secret("SNOWFLAKE_CORTEX_SEARCH_SERVICE")
 WAREHOUSE = get_secret("SNOWFLAKE_WAREHOUSE")
 DATABASE = get_secret("SNOWFLAKE_DATABASE")
 SCHEMA = get_secret("SNOWFLAKE_SCHEMA")
-CORTEX_SEARCH_TABLE_NAME = "LAW_TABLE"
+CORTEX_SEARCH_TABLE_NAME = "DATASET"
 
 class CortexSearchModule:
-    def __init__(self, connector: SnowflakeConnector, pdf_path: str):
+    def __init__(self, connector: SnowflakeConnector, pdf_path: str = None):
         self.connector = connector
         self.pdf_path = pdf_path
         self.session = self.connector.get_session()
@@ -89,13 +89,14 @@ class CortexSearchModule:
             self.session.sql(f"USE SCHEMA {SCHEMA}").collect()
             cmd =f"""
             CREATE OR REPLACE CORTEX SEARCH SERVICE {CORTEX_SERVICE_NAME}
-              ON CHUNKS
+              ON DATA
+              ATTRIBUTES NAME
               WAREHOUSE = {WAREHOUSE}
               TARGET_LAG = '1 hour'
               EMBEDDING_MODEL = 'snowflake-arctic-embed-l-v2.0'
             AS (
               SELECT
-                  CHUNKS
+                   DATA, NAME
               FROM {CORTEX_SEARCH_TABLE_NAME}
             );
             """
@@ -107,9 +108,6 @@ class CortexSearchModule:
 
     async def run(self):
         """Executes the full workflow: database/schema setup, chunking, storing results, and creating the search service."""
-        self.create_database_and_schema()
-        results_df = await self.chunk_text()
-        self.store_results_in_snowflake(results_df)
         # creating cortex search service after creating a new databse
         print("Initializing Cortex Search Service... This might take a few moments.")
         self.create_cortex_search_service()

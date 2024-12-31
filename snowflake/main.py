@@ -15,22 +15,11 @@ load_dotenv()
 
 if __name__ == "__main__":
     _connector = SnowflakeConnector()
-    _create = input("Do You want to create new Database with a pdf Y/N:  ")
-
-    # If the user chooses 'Y', ask for a PDF path, validate its existence, and parse it using CortexSearchModule.
-    # If the file doesn't exist, notify the user. Handle any exceptions gracefully. Otherwise, abort the operation.
-    if _create == 'Y' or _create == 'y':
-        _pdf_path = input("Specify your path for the PDF (give absolute path):  ")
-        try:
-            if os.path.exists(_pdf_path) and os.path.isfile(_pdf_path):
-                _cortex_search = CortexSearchModule(_connector, _pdf_path)
-                asyncio.run(_cortex_search.run())
-            else:
-                print(f"The file '{_pdf_path}' does not exist.")
-        except Exception as err:
-            print(f"Some error occurred: {err}")
-    else:
-        print("Operation aborted as per your choice.")
+    try:
+        _cortex_search = CortexSearchModule(_connector)
+        asyncio.run(_cortex_search.run())
+    except Exception as err:
+        print(f"Some error occurred: {err}")
 
 
 class RAG:
@@ -55,10 +44,10 @@ class RAG:
         )
 
         # Searching and building context
-        resp = my_service.search(query=query, columns=["CHUNKS"], limit=self._limit_to_retirve)
+        resp = my_service.search(query=query, columns=["DATA"], limit=self._limit_to_retirve)
 
         if resp.results:
-            return [curr["CHUNKS"] for curr in resp.results]
+            return [curr["DATA"] for curr in resp.results]
         else:
             return []
 
