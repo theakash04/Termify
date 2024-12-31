@@ -95,6 +95,7 @@ def file_uploade_feature():
                 st.write(st.session_state.parse_status)
                 st.dataframe(st.session_state.data_frame)
 
+icons = {"assistant": "❄️", "user": "👤"}
 
 # welcome message
 if st.session_state.first_load:
@@ -112,22 +113,22 @@ def stream_output(response):
 # showing all messages
 for chat in st.session_state.messages:
     if chat.origin == "user":
-        with st.chat_message("user"):
+        with st.chat_message("user",avatar=icons["user"]):
             st.markdown(chat.message)
     else:
-        with st.chat_message("assistant"):
+        with st.chat_message("assistant", avatar=icons["assistant"]):
             st.markdown(chat.message)
 
 # chatbox and current message response
 if query := st.chat_input("Hello Termify!"):
-    with st.chat_message("user"):
+    with st.chat_message("user", avatar=icons["user"]):
         st.markdown(query)
         st.session_state.messages.append(message("user", query))
 
     with st.spinner("Let me figure that out for you..."):
         response = st.session_state.sfChatApp.query(query)
 
-    with st.chat_message("assistant"):
+    with st.chat_message("assistant", avatar=icons["assistant"]):
         st.write_stream(stream_output(response))
     st.session_state.messages.append(message("ai", response))
 

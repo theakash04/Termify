@@ -39,10 +39,10 @@ class RAG(RAG):
         )
 
         # Searching and building context
-        resp = my_service.search(query=query, columns=["CHUNKS"], limit=self._limit_to_retirve)
+        resp = my_service.search(query=query, columns=["DATA"], limit=self._limit_to_retirve)
 
         if resp.results:
-            return [curr["CHUNKS"] for curr in resp.results]
+            return [curr["DATA"] for curr in resp.results]
         else:
             return []
 
@@ -69,52 +69,52 @@ else:
     rag = RAG(root, session)
     sess_Tru = TruSession()
 
-    data = {
-        "query": [
-            "What is law?",
-            "What is Section 302 in IPC?",
-            "Tell me about Section 376 in IPC?",
-        ],
-        "query_id": ["1", "2", "3"],
-        "expected_response": [
-            "What is Law?",
-            "Section 302 - Murder",
-            "Section 376 - Rape",
-        ],
-        "expected_chunks": [
-            [
-                {
-                    "text": "Law refers to the system of rules that a country or community recognizes as regulating the actions of its members and which it may enforce by the imposition of penalties.",
-                    "title": "What is Law?",
-                    "expected_score": 0.9,
-                }
-            ],
-            [
-                {
-                    "text": "Section 302 of the Indian Penal Code (IPC) defines the punishment for murder, which is a capital punishment or life imprisonment.",
-                    "title": "Section 302 - Murder",
-                    "expected_score": 0.8,
-                }
-            ],
-            [
-                {
-                    "text": "Section 376 of the Indian Penal Code deals with the punishment for the crime of rape, prescribing rigorous imprisonment and a fine.",
-                    "title": "Section 376 - Rape",
-                    "expected_score": 0.8,
-                }
-            ],
-        ],
-    }
-
-    df = pd.DataFrame(data)
-
-    sess_Tru.add_ground_truth_to_dataset(
-        dataset_name="test_dataset_ir",
-        ground_truth_df=df,
-        dataset_metadata={"domain": "Random IR dataset"},
-    )
-
-    ground_truth_df = sess_Tru.get_ground_truth("test_dataset_ir")
+    # data = {
+    #     "query": [
+    #         "What is law?",
+    #         "What is Section 302 in IPC?",
+    #         "Tell me about Section 376 in IPC?",
+    #     ],
+    #     "query_id": ["1", "2", "3"],
+    #     "expected_response": [
+    #         "What is Law?",
+    #         "Section 302 - Murder",
+    #         "Section 376 - Rape",
+    #     ],
+    #     "expected_chunks": [
+    #         [
+    #             {
+    #                 "text": "Law refers to the system of rules that a country or community recognizes as regulating the actions of its members and which it may enforce by the imposition of penalties.",
+    #                 "title": "What is Law?",
+    #                 "expected_score": 0.9,
+    #             }
+    #         ],
+    #         [
+    #             {
+    #                 "text": "Section 302 of the Indian Penal Code (IPC) defines the punishment for murder, which is a capital punishment or life imprisonment.",
+    #                 "title": "Section 302 - Murder",
+    #                 "expected_score": 0.8,
+    #             }
+    #         ],
+    #         [
+    #             {
+    #                 "text": "Section 376 of the Indian Penal Code deals with the punishment for the crime of rape, prescribing rigorous imprisonment and a fine.",
+    #                 "title": "Section 376 - Rape",
+    #                 "expected_score": 0.8,
+    #             }
+    #         ],
+    #     ],
+    # }
+    #
+    # df = pd.DataFrame(data)
+    #
+    # sess_Tru.add_ground_truth_to_dataset(
+    #     dataset_name="test_dataset_ir",
+    #     ground_truth_df=df,
+    #     dataset_metadata={"domain": "Random IR dataset"},
+    # )
+    #
+    # ground_truth_df = sess_Tru.get_ground_truth("test_dataset_ir")
 
     provider = Cortex(
         session,
@@ -123,24 +123,24 @@ else:
 
     retrieved_chunks = [rag.retrieve_context(query)]
 
-    GroundTruthAgreement(ground_truth_df, provider=provider).precision_at_k(
-        query, retrieved_chunks
-    )
-
-    GroundTruthAgreement(ground_truth_df, provider=provider).recall_at_k(
-        query, retrieved_chunks
-    )
-
-    f_groundedness = (
-        Feedback(
-            partial(
-                provider.groundedness_measure_with_cot_reasons, use_sent_tokenize=False
-            ),
-            name="Groundedness",
-        )
-        .on(Select.RecordCalls.retrieve_context.rets[:].collect())
-        .on_output()
-    )
+    # GroundTruthAgreement(ground_truth_df, provider=provider).precision_at_k(
+    #     query, retrieved_chunks
+    # )
+    #
+    # GroundTruthAgreement(ground_truth_df, provider=provider).recall_at_k(
+    #     query, retrieved_chunks
+    # )
+    #
+    # f_groundedness = (
+    #     Feedback(
+    #         partial(
+    #             provider.groundedness_measure_with_cot_reasons, use_sent_tokenize=False
+    #         ),
+    #         name="Groundedness",
+    #     )
+    #     .on(Select.RecordCalls.retrieve_context.rets[:].collect())
+    #     .on_output()
+    # )
 
     # Feedback: Context Relevance
     f_context_relevance = (
