@@ -13,7 +13,7 @@ import streamlit as st
 from snowflake.core._root import Root
 from utils.sessions import SnowflakeConnector
 from snowflake.main import RAG
-from utils.docParser import DocumentParser
+from utils.doc_utils import DocumentProcessor
 
 # page configuration
 st.set_page_config(
@@ -82,8 +82,8 @@ def file_uploade_feature():
             if st.button("parse Document"):
                 with st.status("Parsing data...", expanded=True) as status:
                     st.write("Cleaning the data...")
-                    doc_parser = DocumentParser(path=temp_file_path)
-                    data_frame =  asyncio.run(doc_parser.chunkCreator())
+                    doc_parser = DocumentProcessor()
+                    data_frame =  asyncio.run(doc_parser.chunkCreator(temp_file_path))
                     st.write("storing it in dataframes")
 
                     # Update session state

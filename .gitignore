@@ -26,3 +26,4 @@ Docs.md
 # others
 test.json
 test.py
+snowflake/conversation_chain.py

@@ -1,23 +1,37 @@
 import sys
 import os
 import asyncio
-from dotenv import load_dotenv
+import pandas as pd
 # Add the parent dir to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from utils.sessions import SnowflakeConnector
 from dbCreator import CortexSearchModule
 from utils.secret_loader import get_secret
+from utils.datasets import FileProcessor
+from snowflake.cortex import Summarize
 
-# Load environment variables
-load_dotenv()
 
 
 if __name__ == "__main__":
     _connector = SnowflakeConnector()
+    _cortex_search = CortexSearchModule(_connector)
     try:
-        _cortex_search = CortexSearchModule(_connector)
-        asyncio.run(_cortex_search.run())
+        print("This Command will Process your data than store it in snowflake and create cortex search service\nMake sure you have added all necessary details in the .env file\nSee Readme.md for reference")
+        ask = input("Do you want to proceed(y or n): ")
+        if ask == 'y' or 'Y':
+            folder_path = get_secret("USER_DATASET_FOLDER")
+            output_csv_path = get_secret("USER_DATASET_FOLDER_OUTPUT")
+            if folder_path and output_csv_path is not None:
+                processor = FileProcessor(
+                    folder_path=folder_path,
+                    output_csv_path=output_csv_path,
+                    chunk_size=1000,
+                    overlap=100,
+                )
+                asyncio.run(processor.process())
+                df = pd.read_csv(output_csv_path, names=['NAME', 'DATA'])
+                asyncio.run(_cortex_search.run(df))
     except Exception as err:
         print(f"Some error occurred: {err}")
 
@@ -27,6 +41,7 @@ class RAG:
         self.root = root
         self.session = session
         self._limit_to_retirve = limit_to_retirve
+        self.data = ""
 
 
     def retrieve_context(self, query: str) -> dict:
@@ -53,12 +68,12 @@ class RAG:
 
     def create_prompt(self, query:str, context_str: list)-> str:
         prompt = f"""
-        You are an expert assistant for interpreting privacy policies and terms and conditions of various companies. Provide clear, accurate, and detailed answers strictly based on the provided context.
-        If the answer is not in the context, say you don’t have the information.
-        Do not reference about the context or explain how it is processed.
-        Ensure all responses are factual and avoid hallucinating information.
-        Respond courteously to casual greetings.
+        You are an expert assistant for interpreting privacy policies and terms and conditions.Your name is Termify Provide clear, factual, and detailed answers based only on the following inputs:
+        - **Context:** Relevant information for the current conversation.
+        - **Previous Context:** Relevant information from the previous conversation if available.
+        If the answer is not in the context, say you don’t have the information. Do not reference or explain the context. Respond courteously to casual greetings.
         Context: {context_str}
+        Previous Context: {self.data}
         Question: {query}
         Answer:
         """
@@ -68,8 +83,13 @@ class RAG:
         prompt = self.create_prompt(query, context_str)
         cmd = """select snowflake.cortex.complete(?, ?) as response"""
         model = 'mistral-large2'
-        result = self.session.sql(cmd, params=[model, prompt]).collect()
-        return result[0]['RESPONSE']
+        temprature = 0.2
+        result = self.session.sql(cmd, params=[model, prompt, temprature]).collect()
+        try:
+            return result[0]['RESPONSE']
+        finally:
+            temp = self.data + query + result[0]['RESPONSE']
+            self.data = Summarize(temp, self.session)
 
 
     def query(self, query: str) -> str:
