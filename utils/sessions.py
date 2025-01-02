@@ -1,6 +1,4 @@
 from snowflake.snowpark import Session
-from dotenv import load_dotenv
-
 from utils.secret_loader import get_secret
 
 """
@@ -19,7 +17,6 @@ Usage:
 - Use `close_connection()` to safely close the active session.
 """
 
-load_dotenv()
 
 
 class SnowflakeConnector:

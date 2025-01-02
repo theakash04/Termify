@@ -71,8 +71,13 @@ SNOWFLAKE_PASSWORD=********
 SNOWFLAKE_DATABASE=databasename
 SNOWFLAKE_SCHEMA=schemaname
 SNOWFLAKE_ROLE=role
+CORTEX_SEARCH_TABLE_NAME=table
 SNOWFLAKE_WAREHOUSE=warehousename
 SNOWFLAKE_CORTEX_SEARCH_SERVICE=yourCortexserviceName
+
+# for developers
+USER_DATASET_FOLDER=folder_Path_which_contains_all_data
+USER_DATASET_FOLDER_OUTPUT=snowflake_data.csv
 ```
 
 

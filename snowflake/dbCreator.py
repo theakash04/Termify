@@ -2,14 +2,12 @@ import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from utils.sessions import SnowflakeConnector
-from utils.docParser import DocumentParser
+from utils.doc_utils import DocumentProcessor
 from snowflake.core import Root, CreateMode
 from snowflake.core.database import Database
 from snowflake.core.schema import Schema
-from dotenv import load_dotenv
 from utils.secret_loader import get_secret
 
-load_dotenv()
 
 """
 CortexSearchModule
@@ -37,7 +35,7 @@ CORTEX_SERVICE_NAME = get_secret("SNOWFLAKE_CORTEX_SEARCH_SERVICE")
 WAREHOUSE = get_secret("SNOWFLAKE_WAREHOUSE")
 DATABASE = get_secret("SNOWFLAKE_DATABASE")
 SCHEMA = get_secret("SNOWFLAKE_SCHEMA")
-CORTEX_SEARCH_TABLE_NAME = "DATASET"
+CORTEX_SEARCH_TABLE_NAME = get_secret("CORTEX_SEARCH_TABLE_NAME")
 
 class CortexSearchModule:
     def __init__(self, connector: SnowflakeConnector, pdf_path: str = None):
@@ -65,10 +63,9 @@ class CortexSearchModule:
     async def chunk_text(self):
         """Parses the PDF and creates text chunks."""
         try:
-            document_parser = DocumentParser(
-                path=self.pdf_path, chunk_size=512, chunk_overlap=256
-            )
-            chunks_df = await document_parser.chunkCreator()
+            document_parser = DocumentProcessor()
+            texts = await document_parser.pdfLoader(file_path=self.pdf_path)
+            chunks_df = await document_parser.chunkCreator(texts)
 
             return chunks_df
         except Exception as err:
@@ -106,9 +103,11 @@ class CortexSearchModule:
             print(f"Something happen while creating cortex search service {CORTEX_SERVICE_NAME} in database {DATABASE} and schema {SCHEMA} \n")
             print(err)
 
-    async def run(self):
+    async def run(self, df):
         """Executes the full workflow: database/schema setup, chunking, storing results, and creating the search service."""
         # creating cortex search service after creating a new databse
+        self.create_database_and_schema()
+        self.store_results_in_snowflake(df)
         print("Initializing Cortex Search Service... This might take a few moments.")
         self.create_cortex_search_service()
 

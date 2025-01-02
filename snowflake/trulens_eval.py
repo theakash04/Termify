@@ -1,18 +1,15 @@
 import os
 import sys
 import numpy as np
-import pandas as pd
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from main import RAG
-from functools import partial
 from snowflake.core._root import Root
 from snowflake.cortex import Complete
 from utils.secret_loader import get_secret
 from trulens.providers.cortex import Cortex
 from utils.sessions import SnowflakeConnector
-from trulens.feedback import GroundTruthAgreement
 from trulens.core import TruSession, Feedback, Select
 from trulens.apps.custom import instrument, TruCustomApp
 
@@ -69,78 +66,12 @@ else:
     rag = RAG(root, session)
     sess_Tru = TruSession()
 
-    # data = {
-    #     "query": [
-    #         "What is law?",
-    #         "What is Section 302 in IPC?",
-    #         "Tell me about Section 376 in IPC?",
-    #     ],
-    #     "query_id": ["1", "2", "3"],
-    #     "expected_response": [
-    #         "What is Law?",
-    #         "Section 302 - Murder",
-    #         "Section 376 - Rape",
-    #     ],
-    #     "expected_chunks": [
-    #         [
-    #             {
-    #                 "text": "Law refers to the system of rules that a country or community recognizes as regulating the actions of its members and which it may enforce by the imposition of penalties.",
-    #                 "title": "What is Law?",
-    #                 "expected_score": 0.9,
-    #             }
-    #         ],
-    #         [
-    #             {
-    #                 "text": "Section 302 of the Indian Penal Code (IPC) defines the punishment for murder, which is a capital punishment or life imprisonment.",
-    #                 "title": "Section 302 - Murder",
-    #                 "expected_score": 0.8,
-    #             }
-    #         ],
-    #         [
-    #             {
-    #                 "text": "Section 376 of the Indian Penal Code deals with the punishment for the crime of rape, prescribing rigorous imprisonment and a fine.",
-    #                 "title": "Section 376 - Rape",
-    #                 "expected_score": 0.8,
-    #             }
-    #         ],
-    #     ],
-    # }
-    #
-    # df = pd.DataFrame(data)
-    #
-    # sess_Tru.add_ground_truth_to_dataset(
-    #     dataset_name="test_dataset_ir",
-    #     ground_truth_df=df,
-    #     dataset_metadata={"domain": "Random IR dataset"},
-    # )
-    #
-    # ground_truth_df = sess_Tru.get_ground_truth("test_dataset_ir")
-
     provider = Cortex(
         session,
         model_engine="mistral-large2",
     )
 
     retrieved_chunks = [rag.retrieve_context(query)]
-
-    # GroundTruthAgreement(ground_truth_df, provider=provider).precision_at_k(
-    #     query, retrieved_chunks
-    # )
-    #
-    # GroundTruthAgreement(ground_truth_df, provider=provider).recall_at_k(
-    #     query, retrieved_chunks
-    # )
-    #
-    # f_groundedness = (
-    #     Feedback(
-    #         partial(
-    #             provider.groundedness_measure_with_cot_reasons, use_sent_tokenize=False
-    #         ),
-    #         name="Groundedness",
-    #     )
-    #     .on(Select.RecordCalls.retrieve_context.rets[:].collect())
-    #     .on_output()
-    # )
 
     # Feedback: Context Relevance
     f_context_relevance = (
@@ -167,7 +98,7 @@ else:
     tru_rag = TruCustomApp(
         rag,
         app_name="Termify",
-        app_version="v1.2",
+        app_version="v1.2.1",
         feedbacks=[f_answer_relevance, f_context_relevance, f_coherence],
     )
 
