@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 import sys
 import os
+import uuid
 import time
 import asyncio
 from typing import Literal
@@ -13,16 +14,15 @@ import streamlit as st
 from snowflake.core._root import Root
 from utils.sessions import SnowflakeConnector
 from snowflake.main import RAG
-from utils.doc_utils import DocumentProcessor
-
+from utils.Custom_cortex import customCortex
 # page configuration
 st.set_page_config(
     page_title="Termify",
     page_icon="📝",
     layout="centered",
-    initial_sidebar_state="collapsed",
+    initial_sidebar_state="auto",
     menu_items={
-        "Get Help": "https://akashtwt.tech",
+        "Get Help": "https://github.com/theakash04/snowflake-LLM",
         "Report a bug": "https://github.com/theakash04/snowflake-LLM",
         "About": "This is Termify that helps in understanding legal terms and concepts.",
     },
@@ -47,11 +47,24 @@ def initialize_session_state():
     if "first_load" not in st.session_state:
         st.session_state.first_load = True
 
-    if "data_frame" not in st.session_state:
-        st.session_state.data_frame = None
-
     if "parse_status" not in st.session_state:
         st.session_state.parse_status = None
+
+    if "custom_cortex_details" not in st.session_state:
+        st.session_state.custom_cortex_details = {
+            "schema": f"db_{uuid.uuid4().hex}_{int(time.time())}",
+            "cortexServiceName":f"css_{uuid.uuid4().hex}_{int(time.time())}",
+            "using_custom_cortex": False
+        }
+
+    if "user_cortex" not in st.session_state:
+        st.session_state.user_cortex = customCortex(
+            session=st.session_state.session, root=st.session_state.root, schema=st.session_state.custom_cortex_details["schema"],service_name=st.session_state.custom_cortex_details["cortexServiceName"]
+        )
+
+    if 'initialized' not in st.session_state:
+        st.session_state.initialized = True
+
 
 
 initialize_session_state()
@@ -67,33 +80,36 @@ def clearChat():
     st.session_state.data_frame = None
     st.session_state.parse_status = None
 
-# new feature function
+def on_session_end():
+    st.session_state.user_cortex.delete_schema()
+
+if not st.session_state.initialized:
+    on_session_end()
+
+
+@st.dialog("Use your Own file")
 def file_uploade_feature():
+    st.warning("Do not close this dialog or click other buttons once the operation starts, as it may interrupt the process and corrupt your data.")
     uploaded_file = st.file_uploader("Upload your File", type="pdf", help="Do not upload any confidential informations")
 
     # temporarely store document into local_disk for better convinience while parsing
     if uploaded_file is not None:
         temp_file_path = f"temp_{uploaded_file.name}"
-        with st.spinner('uploading temporary file...'):
-            with open(temp_file_path, "wb") as temp_file:
-                temp_file.write(uploaded_file.read())
+        with open(temp_file_path, "wb") as temp_file:
+            temp_file.write(uploaded_file.read())
 
-            # parse user documents into snowflake db
-            if st.button("parse Document"):
-                with st.status("Parsing data...", expanded=True) as status:
-                    st.write("Cleaning the data...")
-                    doc_parser = DocumentProcessor()
-                    data_frame =  asyncio.run(doc_parser.chunkCreator(temp_file_path))
-                    st.write("storing it in dataframes")
+        # parse user documents into snowflake db
+        if st.button("parse Document"):
+            with st.status("Uploading... This might take a few minutes. ⏳", expanded=True) as status:
+                asyncio.run(
+                    st.session_state.user_cortex.Create_service(temp_file_path)
+                )
+                st.session_state.custom_cortex_details["using_custom_cortex"] = True
+                os.remove(temp_file_path)
 
-                    # Update session state
-                    st.session_state.data_frame = data_frame
-                    st.session_state.parse_status = "successfully parsed data!"
-                    status.update(label=st.session_state.parse_status, state="complete", expanded=False)
-
-            if st.session_state.data_frame is not None:
-                st.write(st.session_state.parse_status)
-                st.dataframe(st.session_state.data_frame)
+                # Update session state
+                st.session_state.parse_status = "successfully parsed data!"
+                status.update(label=st.session_state.parse_status, state="complete", expanded=False)
 
 icons = {"assistant": "❄️", "user": "👤"}
 
@@ -126,7 +142,13 @@ if query := st.chat_input("Hello Termify!"):
         st.session_state.messages.append(message("user", query))
 
     with st.spinner("Let me figure that out for you..."):
-        response = st.session_state.sfChatApp.query(query)
+        user_data = st.session_state.custom_cortex_details["using_custom_cortex"]
+        if user_data:
+            schema = st.session_state.custom_cortex_details["schema"]
+            cortex_service_name = st.session_state.custom_cortex_details["cortexServiceName"]
+            response = st.session_state.sfChatApp.query(query,user_data,schema, cortex_service_name)
+        else:
+            response = st.session_state.sfChatApp.query(query, user_data)
 
     with st.chat_message("assistant", avatar=icons["assistant"]):
         st.write_stream(stream_output(response))
@@ -135,5 +157,6 @@ if query := st.chat_input("Hello Termify!"):
 
 # sidebar
 with st.sidebar:
-    clearBtn = st.button("clear chat", on_click=clearChat)
-    # file_uploade_feature()
+    if "own_doc" not in st.session_state:
+        if st.button("Upload Your File"):
+            file_uploade_feature()
