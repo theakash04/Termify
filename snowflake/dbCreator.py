@@ -35,6 +35,7 @@ CORTEX_SERVICE_NAME = get_secret("SNOWFLAKE_CORTEX_SEARCH_SERVICE")
 WAREHOUSE = get_secret("SNOWFLAKE_WAREHOUSE")
 DATABASE = get_secret("SNOWFLAKE_DATABASE")
 SCHEMA = get_secret("SNOWFLAKE_SCHEMA")
+USER_DATABASE = get_secret("USER_DATABASE")
 CORTEX_SEARCH_TABLE_NAME = get_secret("CORTEX_SEARCH_TABLE_NAME")
 
 class CortexSearchModule:
@@ -49,6 +50,9 @@ class CortexSearchModule:
         try:
             database = root.databases.create(
                 Database(name=DATABASE), mode=CreateMode.or_replace
+            )
+            root.databases.create(
+                Database(name=USER_DATABASE), mode=CreateMode.or_replace
             )
             print("Created databases Successfully")
 
@@ -79,8 +83,6 @@ class CortexSearchModule:
 
     def create_cortex_search_service(self):
         """Creates or replaces the Cortex Search Service in Snowflake."""
-
-        #NOTE: we can add attributes for filtering of data using a column in table but RN we only have one column in table
         try:
             self.session.sql(f"USE DATABASE {DATABASE}").collect()
             self.session.sql(f"USE SCHEMA {SCHEMA}").collect()

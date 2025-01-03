@@ -33,8 +33,8 @@ Usage:
 class DocumentProcessor:
     def __init__(
         self,
-        chunk_size=1000,
-        overlap=100,
+        chunk_size=700,
+        overlap=50,
     ):
         self.chunk_size = chunk_size
         self.overlap = overlap
@@ -53,7 +53,7 @@ class DocumentProcessor:
         except Exception as e:
             raise RuntimeError(f"An error occurred while loading the document: {e}")
 
-    async def clean_text(self, texts):
+    def clean_text(self, texts):
         cleaned_chunks = []
         for chunk in texts:
             try:
@@ -66,7 +66,7 @@ class DocumentProcessor:
         return cleaned_chunks
 
     # Method to divide the PDF into chunks
-    async def chunkCreator(self, texts):
+    def chunkCreator(self, texts):
         try:
             text_splitter = RecursiveCharacterTextSplitter(
                 chunk_size=self.chunk_size,
@@ -75,7 +75,7 @@ class DocumentProcessor:
             )
 
             chunks = text_splitter.split_text(texts)
-            cleaned_chunks = await self.clean_text(chunks)
+            cleaned_chunks = self.clean_text(chunks)
             chunks_data_frame = pd.DataFrame(cleaned_chunks, columns=["CHUNKS"])
             return chunks_data_frame
         except Exception as e:

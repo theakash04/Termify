@@ -22,11 +22,13 @@ class FileProcessor(DocumentProcessor):
         process: Processes JSON and PDF files in
     """
 
-    def __init__(self, folder_path, output_csv_path, chunk_size, overlap):
+    def __init__(self, folder_path, output_csv_path, chunksize=None, overlap=None):
+        chunk_size = chunksize if chunksize is not None else self.chunk_size
+        overlap = overlap if overlap is not None else self.overlap
+
+        super().__init__(chunk_size=chunk_size, overlap=overlap) 
         self.folder_path = folder_path
         self.output_csv_path = output_csv_path
-        self.chunk_size = chunk_size
-        self.overlap = overlap
 
     async def clean_json(self, json_content):
         if isinstance(json_content, dict):

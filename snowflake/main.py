@@ -18,16 +18,16 @@ if __name__ == "__main__":
     _cortex_search = CortexSearchModule(_connector)
     try:
         print("This Command will Process your data than store it in snowflake and create cortex search service\nMake sure you have added all necessary details in the .env file\nSee Readme.md for reference")
-        ask = input("Do you want to proceed(y or n): ")
-        if ask == 'y' or 'Y':
+        ask = input("Do you want to proceed(y or n): ").lower()
+        if ask in ['y', 'yes',]:
             folder_path = get_secret("USER_DATASET_FOLDER")
             output_csv_path = get_secret("USER_DATASET_FOLDER_OUTPUT")
             if folder_path and output_csv_path is not None:
                 processor = FileProcessor(
                     folder_path=folder_path,
                     output_csv_path=output_csv_path,
-                    chunk_size=1000,
-                    overlap=100,
+                    chunksize=800,
+                    overlap=50
                 )
                 asyncio.run(processor.process())
                 df = pd.read_csv(output_csv_path, names=['NAME', 'DATA'])
@@ -44,27 +44,38 @@ class RAG:
         self.data = ""
 
 
-    def retrieve_context(self, query: str) -> dict:
+    def retrieve_context(self, query: str, user_data: bool, user_schema = None, cortex_service_name = None) -> dict:
         if not self.root or not self.session:
-            return {
-                "input": query,
-                "response": "Something unexpected happened. Contact customer support.",
-            }
+            return ["Something unexpected happened. Contact customer support."]
 
-        # Accessing the Snowflake Cortex search service
-        my_service = (
-            self.root.databases[get_secret("SNOWFLAKE_DATABASE")]
-            .schemas[get_secret("SNOWFLAKE_SCHEMA")]
-            .cortex_search_services[get_secret("SNOWFLAKE_CORTEX_SEARCH_SERVICE")]
-        )
+        if not user_data:
+            # Accessing the Snowflake Cortex search service
+            my_service = (
+                self.root.databases[get_secret("SNOWFLAKE_DATABASE")]
+                .schemas[get_secret("SNOWFLAKE_SCHEMA")]
+                .cortex_search_services[get_secret("SNOWFLAKE_CORTEX_SEARCH_SERVICE")]
+            )
+            # Searching and building context
+            resp = my_service.search(query=query, columns=["DATA"], limit=self._limit_to_retirve)
 
-        # Searching and building context
-        resp = my_service.search(query=query, columns=["DATA"], limit=self._limit_to_retirve)
-
-        if resp.results:
-            return [curr["DATA"] for curr in resp.results]
+            if resp.results:
+                return [curr["DATA"] for curr in resp.results]
+            else:
+                return ["No relevent text found"]
         else:
-            return []
+            user_service = (
+                self.root.databases[get_secret("USER_DATABASE")]
+                .schemas[user_schema]
+                .cortex_search_services[cortex_service_name]
+            )
+
+            resp = user_service.search(query=query, columns=["CHUNKS"], limit=self._limit_to_retirve)
+
+            if resp.results:
+                return [curr["CHUNKS"] for curr in resp.results]
+            else:
+                return ["No relevent text found"]
+
 
     def create_prompt(self, query:str, context_str: list)-> str:
         prompt = f"""
@@ -84,7 +95,8 @@ class RAG:
         cmd = """select snowflake.cortex.complete(?, ?) as response"""
         model = 'mistral-large2'
         temprature = 0.2
-        result = self.session.sql(cmd, params=[model, prompt, temprature]).collect()
+        top_p = 0.3
+        result = self.session.sql(cmd, params=[model, prompt, temprature, top_p]).collect()
         try:
             return result[0]['RESPONSE']
         finally:
@@ -92,8 +104,8 @@ class RAG:
             self.data = Summarize(temp, self.session)
 
 
-    def query(self, query: str) -> str:
-        context_str = self.retrieve_context(query)
+    def query(self, query: str, user_data: bool, user_schema = None, cortexServiceName = None) -> str:
+        context_str = self.retrieve_context(query, user_data, user_schema, cortexServiceName)
         return self.generate_completion(query, context_str)
 
 
