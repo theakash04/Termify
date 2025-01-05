@@ -61,7 +61,7 @@ class FileProcessor(DocumentProcessor):
                                     content = json.load(json_file)
                                 cleaned_json = await self.clean_json(content)
                                 cleaned_json_str = json.dumps(cleaned_json)
-                                chunks_df = await self.chunkCreator(cleaned_json_str)
+                                chunks_df = self.chunkCreator(cleaned_json_str)
                                 for chunk in chunks_df["CHUNKS"]:
                                     writer.writerow(
                                         {"name": folder_name, "data": chunk}
@@ -70,7 +70,7 @@ class FileProcessor(DocumentProcessor):
                                 pdf_text = await self.pdfLoader(file_full_path)
 
                                 if pdf_text:
-                                    chunks_df = await self.chunkCreator(pdf_text)
+                                    chunks_df = self.chunkCreator(pdf_text)
                                     for chunk in chunks_df["CHUNKS"]:
                                         writer.writerow(
                                             {"name": folder_name, "data": chunk}

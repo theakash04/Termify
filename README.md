@@ -74,6 +74,7 @@ SNOWFLAKE_ROLE=role
 CORTEX_SEARCH_TABLE_NAME=table
 SNOWFLAKE_WAREHOUSE=warehousename
 SNOWFLAKE_CORTEX_SEARCH_SERVICE=yourCortexserviceName
+USER_DATABASE=USER_DATA
 
 # for developers
 USER_DATASET_FOLDER=folder_Path_which_contains_all_data
@@ -168,6 +169,11 @@ SNOWFLAKE_SCHEMA = "schemaname"
 SNOWFLAKE_ROLE = "role"
 SNOWFLAKE_WAREHOUSE = "warehousename"
 SNOWFLAKE_CORTEX_SEARCH_SERVICE = "yourCortexserviceName"
+USER_DATABASE="USER_DATA"
+
+# for developers
+USER_DATASET_FOLDER="folder_Path_which_contains_all_data"
+USER_DATASET_FOLDER_OUTPUT="snowflake_data.csv"
 ```
 
 This approach is especially useful for securely managing secrets in Streamlit applications.
